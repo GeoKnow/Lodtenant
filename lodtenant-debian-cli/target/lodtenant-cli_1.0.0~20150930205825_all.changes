@@ -1,0 +1,34 @@
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+Format: 1.8
+Date: Wed, 30 Sep 2015 20:58:28 +0200
+Source: lodtenant-cli
+Binary: lodtenant-cli
+Architecture: all
+Version: 1.0.0~20150930205825
+Distribution: ldstack-nightly
+Urgency: low
+Maintainer: Claus Stadler <cstadler@informatik.uni-leipzig.de>
+Changed-By: Claus Stadler <cstadler@informatik.uni-leipzig.de>
+Description:
+ lodtenant-cli - Lodtenant Command Line Interfaces
+Changes:
+ lodtenant-cli (1.0.0~20150930205825) ldstack-nightly; urgency=low
+Checksums-Sha1:
+ 1dfc4cbc1b6415a7a4a88cf7485cf188c682642c 6246 lodtenant-cli_1.0.0~20150930205825_all.deb
+Checksums-Sha256:
+ b153f2e930ada6b3a158d30f6b31abd26c0c5da23f9eb0c2f59eecb67266f9e7 6246 lodtenant-cli_1.0.0~20150930205825_all.deb
+Files:
+ 2faf232879fafc6b8d889d220c2bd61a 6246 web optional lodtenant-cli_1.0.0~20150930205825_all.deb
+-----BEGIN PGP SIGNATURE-----
+Version: BCPG v1.51
+
+iQEcBAEBAgAGBQJWDDDUAAoJEGWPpbKvoiPtz0oH/3EPkEc/GVmZ8M0OBHEjUSi1
+q41O1nBCudJKqgEJsp+VATKqYNWmO25eHJK47kZ++TE1IWMrVELmnKjq42AQlvZQ
+l6Zd3TdDRY4QDbe4s90X6TdtdT7DLGgARTYrjyEzU8x25jG27342duq5Cil1TbWC
+9U+yafOw+6AxhASMj7MU2xHMjDEX/A2l15FcjGiV8I1BoHjjvOfe/ouXHENTmaDb
+g8S9AmiyGWWStxkS9n7WoRzWKcZQVIyt+09gwyXtV/B00vWa1TUN6TeblMcWuKwB
+3USlhBXVOte3LOuB/LWz51/wCOErz3xA2R9kXfJrcXDevRkc/psaLs8igAmaAFg=
+=c0bH
+-----END PGP SIGNATURE-----
