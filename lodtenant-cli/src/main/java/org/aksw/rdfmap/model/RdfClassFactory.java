@@ -1,0 +1,152 @@
+package org.aksw.rdfmap.model;
+
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
+import org.aksw.commons.util.strings.StringUtils;
+import org.aksw.jena_sparql_api.concepts.Relation;
+import org.aksw.jena_sparql_api.concepts.RelationUtils;
+import org.aksw.jena_sparql_api.stmt.SparqlRelationParser;
+import org.aksw.jena_sparql_api.stmt.SparqlRelationParserImpl;
+import org.aksw.lodtenant.manager.domain.RdfType;
+import org.aksw.rdfmap.annotation.DefaultIri;
+import org.aksw.rdfmap.annotation.Iri;
+import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.expression.EvaluationContext;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.ParserContext;
+import org.springframework.expression.common.TemplateParserContext;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.util.ReflectionUtils;
+
+import com.google.common.base.Function;
+
+public class RdfClassFactory {
+
+    /*
+     * SpEL parser and evaluator
+     */
+    protected ExpressionParser parser;
+    protected EvaluationContext evalContext;
+    protected ParserContext parserContext;
+
+    protected SparqlRelationParser relationParser;
+
+
+
+
+    public RdfClassFactory(ExpressionParser parser, ParserContext parserContext, EvaluationContext evalContext, SparqlRelationParser relationParser) {
+        super();
+        this.parser = parser;
+        this.evalContext = evalContext;
+        this.parserContext = parserContext;
+        this.relationParser = relationParser;
+    }
+
+    public RdfClass create(Class<?> clazz) {
+        RdfClass result;
+        try {
+            result = _create(clazz);
+        } catch (IntrospectionException e) {
+            throw new RuntimeException(e);
+        }
+        return result;
+    }
+
+
+    public static <A extends Annotation> A getAnnotation(Class<?> clazz, PropertyDescriptor pd, Class<A> annotation) {
+        A result;
+
+        String propertyName = pd.getName();
+        Field f = ReflectionUtils.findField(clazz, propertyName);
+        result = f != null
+                ? f.getAnnotation(annotation)
+                : null
+                ;
+
+        result = result == null && pd.getReadMethod() != null
+                ? AnnotationUtils.findAnnotation(pd.getReadMethod(), annotation)
+                : result
+                ;
+
+        result = result != null && pd.getWriteMethod() != null
+                ? AnnotationUtils.findAnnotation(pd.getWriteMethod(), annotation)
+                : result
+                ;
+
+
+
+        return result;
+    }
+
+
+
+    protected RdfClass _create(Class<?> clazz) throws IntrospectionException {
+
+        RdfType x = clazz.getAnnotation(RdfType.class);
+        DefaultIri defaultIri = clazz.getAnnotation(DefaultIri.class);
+
+        Function<Object, String> defaultIriFn = null;
+        if(defaultIri != null) {
+            String iriStr = defaultIri.toString();
+            Expression expression = parser.parseExpression(iriStr, parserContext);
+             defaultIriFn = new F_GetValue<String>(String.class, expression, evalContext);
+        }
+
+        Map<String, RdfProperty> rdfProperties = new LinkedHashMap<String, RdfProperty>();
+
+        BeanInfo bi = Introspector.getBeanInfo(clazz);
+        for(PropertyDescriptor pd : bi.getPropertyDescriptors()) {
+            String propertyName = pd.getName();
+            System.out.println("PropertyName: " + propertyName);
+
+            Iri iri = getAnnotation(clazz, pd, Iri.class);
+            if(iri != null) {
+                String iriStr = iri.value();
+
+
+                Relation relation = RelationUtils.createRelation(iriStr, false, null);
+
+                RdfProperty rdfProperty = new RdfProperty(propertyName, relation);
+                rdfProperties.put(propertyName, rdfProperty);
+
+                System.out.println("--- Found anno: " + iri.value());
+            }
+        }
+
+        RdfClass result = new RdfClass(clazz, defaultIriFn, rdfProperties);
+        return result;
+
+
+
+//        Expression expr = parser.parseExpression(exprStr, parserContext);
+//        String rawIri = expr.getValue(evalContext, w, String.class);
+//        System.out.println(rawIri);
+    }
+
+
+    public static RdfClassFactory createDefault() {
+        StandardEvaluationContext evalContext = new StandardEvaluationContext();
+        TemplateParserContext parserContext = new TemplateParserContext();
+
+        try {
+            evalContext.registerFunction("md5", StringUtils.class.getDeclaredMethod("md5Hash", new Class[] { String.class }));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        ExpressionParser parser = new SpelExpressionParser();
+
+        SparqlRelationParser relationParser = new SparqlRelationParserImpl();
+
+        RdfClassFactory result = new RdfClassFactory(parser, parserContext, evalContext, relationParser);
+        return result;
+    }
+}
