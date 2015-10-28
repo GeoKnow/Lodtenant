@@ -5,6 +5,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.atlas.lib.MapUtils;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
@@ -242,7 +243,7 @@ public class TalisRdfTerm {
             Triple gsp = new Triple(g, s, p);
 
             MapUtils.increment(gspToCount, gsp);
-            Integer i = gspToCount.get(gsp);
+            Integer i = gspToCount.get(gsp) - 1;
             for(int c = 0; c < 4; ++c) {
                 String v = TalisRdfTerm.getComponent(o, c);
 
@@ -282,14 +283,17 @@ public class TalisRdfTerm {
             String datatype = getComponent(map, gsp, i, 2);
             String lang = getComponent(map, gsp, i, 3);
 
+//            if(!StringUtils.isEmpty(lang)) {
+//                System.out.println(lang);
+//            }
+
             TalisRdfTerm term = new TalisRdfTerm(type, value, datatype, lang);
 
-            Node node = TalisRdfTerm.createNode(term);
+            Node o = TalisRdfTerm.createNode(term);
 
-//            for(int c = 0; c < 4 ; ++c) {
-//            }
+            Quad quad = new Quad(g, s, p, o);
+            result.add(quad);
         }
-
 
         return result;
     }

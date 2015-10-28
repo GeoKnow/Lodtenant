@@ -11,6 +11,10 @@ public class MapDatasetGraphRdfTerm
 {
     protected DatasetGraph datasetGraph;
 
+    public MapDatasetGraphRdfTerm(DatasetGraph datasetGraph) {
+        this.datasetGraph = datasetGraph;
+    }
+
     @Override
     public String get(Object coordinate) {
         String result = null;

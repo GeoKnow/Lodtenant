@@ -79,7 +79,7 @@ public class ListObjectsOfDatasetGraph
     }
 
     public static ListObjectsOfDatasetGraph create(DatasetGraph datasetGraph, Node g, Node s, Node p) {
-        Quad quad = new Quad(g, s, p, null);
+        Quad quad = new Quad(g, s, p, Node.ANY);
         ListObjectsOfDatasetGraph result = new ListObjectsOfDatasetGraph(datasetGraph, quad);
         return result;
     }
