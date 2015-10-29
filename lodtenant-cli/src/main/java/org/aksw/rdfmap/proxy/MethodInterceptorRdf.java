@@ -3,6 +3,7 @@ package org.aksw.rdfmap.proxy;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 
+import org.aksw.rdfmap.model.RdfClass;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.beans.PropertyValue;
@@ -20,11 +21,16 @@ public class MethodInterceptorRdf
 
     protected Object proxied;
 
+    protected RdfClass rdfClass;
+
     protected Node presetSubject; // The subject URI that corresponds to the proxied object
     protected DatasetGraph datasetGraph;
 
-    public MethodInterceptorRdf(Object proxied, Node subject, DatasetGraph datasetGraph) {
+
+    public MethodInterceptorRdf(Object proxied, RdfClass rdfClass, Node subject, DatasetGraph datasetGraph) {
         this.proxied = proxied;
+
+        this.rdfClass = rdfClass;
 
         /**
          * Pre-set subject - may be null
@@ -35,6 +41,10 @@ public class MethodInterceptorRdf
          * Pre-set datasetGraph, may be empty (but must not be null)
          */
         this.datasetGraph = datasetGraph;
+    }
+
+    public RdfClass getRdfClass() {
+        return rdfClass;
     }
 
     public Object getProxied() {

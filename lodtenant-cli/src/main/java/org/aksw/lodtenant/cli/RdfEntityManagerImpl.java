@@ -6,11 +6,15 @@ import java.util.Map;
 
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.SparqlService;
+import org.aksw.jena_sparql_api.core.UpdateExecutionFactory;
+import org.aksw.jena_sparql_api.core.utils.UpdateExecutionUtils;
 import org.aksw.jena_sparql_api.lookup.LookupService;
 import org.aksw.jena_sparql_api.lookup.LookupServiceUtils;
 import org.aksw.jena_sparql_api.mapper.MappedConcept;
+import org.aksw.jena_sparql_api.utils.DatasetGraphUtils;
 import org.aksw.rdfmap.model.RdfClass;
 import org.aksw.rdfmap.model.RdfClassFactory;
+import org.aksw.rdfmap.proxy.MethodInterceptorRdf;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
@@ -47,9 +51,10 @@ public class RdfEntityManagerImpl
     }
 
     @Override
-    public <T> List<T> find(Class<T> clazz, Object primaryKey) {
+    public <T> T find(Class<T> clazz, Object primaryKey) {
 
-        RdfClass rdfClass = RdfClassFactory.createDefault().create(clazz);
+        RdfClassFactory rdfClassFactory = RdfClassFactory.createDefault(prologue);
+        RdfClass rdfClass = rdfClassFactory.create(clazz);
 
         MappedConcept<DatasetGraph> shape = rdfClass.getMappedQuery();
 
@@ -70,20 +75,38 @@ public class RdfEntityManagerImpl
         if(dg == null) {
             dg = DatasetGraphFactory.createMem();
         }
-        System.out.println(dg);
+        //System.out.println(dg);
 
 
-        rdfClass.createProxy(dg, node);
+        Object proxy = rdfClass.createProxy(dg, node);
 
-System.out.println(shape);
+        rdfClass.setValues(proxy, dg);
 
-        // TODO Auto-generated method stub
-        return null;
+
+        T result = (T)proxy;
+        //List<T> result = Collections.<T>singletonList(item);
+        return result;
     }
 
     @Override
     public void merge(Object object) {
-        // TODO Auto-generated method stub
+        MethodInterceptorRdf interceptor = RdfClass.getMethodInterceptor(object);
 
+        DatasetGraph oldState = interceptor == null
+                ? DatasetGraphFactory.createMem()
+                : interceptor.getDatasetGraph()
+                ;
+
+        Class<?> clazz = object.getClass();
+        RdfClass rdfClass = RdfClassFactory.createDefault(prologue).create(clazz);
+
+
+
+        DatasetGraph newState = rdfClass.createDatasetGraph(object);
+
+        DatasetGraphUtils.write(System.out, newState);
+
+        UpdateExecutionFactory uef = sparqlService.getUpdateExecutionFactory();
+        UpdateExecutionUtils.executeUpdateDelta(uef, newState, oldState);
     }
 }

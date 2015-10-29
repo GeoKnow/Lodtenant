@@ -19,6 +19,7 @@ import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
+import com.hp.hpl.jena.sparql.core.Prologue;
 import com.hp.hpl.jena.sparql.core.Var;
 import com.hp.hpl.jena.sparql.engine.binding.BindingHashMap;
 import com.hp.hpl.jena.vocabulary.XSD;
@@ -144,20 +145,20 @@ class CoordinateGraph {
 public class MainRdfAnnotation {
     public static void main(String[] args) throws NoSuchMethodException, SecurityException {
 
-        RdfClassFactory f = RdfClassFactory.createDefault();
-        RdfClass rc = f.create(Workflow.class);
-
-        Workflow x = (Workflow)rc.createProxy(DatasetGraphFactory.createMem(), NodeFactory.createURI("http://workflow1"));
-
-        System.out.println("WOOOHOOO" + x);
-
+        Prologue prologue = new Prologue();
+        prologue.setPrefix("o", "http://example.org/");
         SparqlService ss = FluentSparqlService.http("http://localhost:8890/sparql", "http://rdfmap.org/").create();
+        RdfEntityManager entityManager = new RdfEntityManagerImpl(prologue, null, ss);
 
-        RdfEntityManager entityManager = new RdfEntityManagerImpl(null, null, ss);
-        entityManager.find(Workflow.class, "http://foobar");
 
-        Workflow w = new Workflow("{}", new User("franz"));
+        Workflow wa = entityManager.find(Workflow.class, "http://example.org/99914b932bd37a50b983c5e7c90ae93b-franz");
 
-        System.out.println("SUBJECT IS " + rc.getSubject(w));
+        if(wa == null) {
+            wa = new Workflow("{}", new User("franz"));
+        }
+
+        wa.setContent("yaaaaay");
+
+        entityManager.merge(wa);
     }
 }

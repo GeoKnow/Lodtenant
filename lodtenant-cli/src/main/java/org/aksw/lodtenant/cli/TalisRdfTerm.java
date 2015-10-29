@@ -1,11 +1,12 @@
 package org.aksw.lodtenant.cli;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.atlas.lib.MapUtils;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;
@@ -32,6 +33,13 @@ public class TalisRdfTerm {
     protected String datatype;
     protected String lang;
 
+    public static TalisRdfTerm update(TalisRdfTerm term, int component, String value) {
+        List<String> cs = TalisRdfTerm.toArray(term);
+        cs.set(component, value);
+        TalisRdfTerm result = TalisRdfTerm.create(cs);
+        return result;
+    }
+
     public TalisRdfTerm(String type, String value,
             String datatype, String lang) {
         super();
@@ -39,6 +47,26 @@ public class TalisRdfTerm {
         this.value = value;
         this.datatype = datatype;
         this.lang = lang;
+    }
+
+    public static List<String> toArray(TalisRdfTerm term) {
+        List<String> tmp = Arrays.asList(term.getType(), term.getValue(), term.getDatatype(), term.getLang());
+        List<String> result = new ArrayList<String>(tmp);
+        return result;
+    }
+
+    public static TalisRdfTerm create(List<String> arr) {
+        if(arr.size() != 4) {
+            throw new RuntimeException("Exactly 4 components needed");
+        }
+
+        String type = arr.get(0);
+        String value = arr.get(1);
+        String datatype = arr.get(2);
+        String lang = arr.get(3);
+
+        TalisRdfTerm result = new TalisRdfTerm(type, value, datatype, lang);
+        return result;
     }
 
     public String getType() {
@@ -264,6 +292,17 @@ public class TalisRdfTerm {
         QuadCoordinate key = new QuadCoordinate(g, s, p, i, c);
         String result = map.get(key);
         return result;
+    }
+
+    public static Map<QuadCoordinate, String> createMap(DatasetGraph datasetGraph) {
+        //DatasetGraphSimpleMem x;
+
+        Map<QuadCoordinate, String> result = new HashMap<QuadCoordinate, String>(new MapDatasetGraphRdfTerm(datasetGraph));
+        return result;
+    }
+
+    public static Map<Node, Map<Node, Map<Node, List<Node>>>> createTalisGraph(DatasetGraph dg) {
+        return null;
     }
 
     public static DatasetGraph assembleDatasetGraph(Map<QuadCoordinate, String> map, TalisRdfTerm defaults) {

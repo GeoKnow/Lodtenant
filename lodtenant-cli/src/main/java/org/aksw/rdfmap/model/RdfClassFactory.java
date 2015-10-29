@@ -28,6 +28,9 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.util.ReflectionUtils;
 
 import com.google.common.base.Function;
+import com.hp.hpl.jena.query.Syntax;
+import com.hp.hpl.jena.shared.PrefixMapping;
+import com.hp.hpl.jena.sparql.core.Prologue;
 
 public class RdfClassFactory {
 
@@ -38,16 +41,17 @@ public class RdfClassFactory {
     protected EvaluationContext evalContext;
     protected ParserContext parserContext;
 
+    protected Prologue prologue;
     protected SparqlRelationParser relationParser;
 
 
 
-
-    public RdfClassFactory(ExpressionParser parser, ParserContext parserContext, EvaluationContext evalContext, SparqlRelationParser relationParser) {
+    public RdfClassFactory(ExpressionParser parser, ParserContext parserContext, EvaluationContext evalContext, Prologue prologue, SparqlRelationParser relationParser) {
         super();
         this.parser = parser;
         this.evalContext = evalContext;
         this.parserContext = parserContext;
+        this.prologue = prologue;
         this.relationParser = relationParser;
     }
 
@@ -77,7 +81,7 @@ public class RdfClassFactory {
                 : result
                 ;
 
-        result = result != null && pd.getWriteMethod() != null
+        result = result == null && pd.getWriteMethod() != null
                 ? AnnotationUtils.findAnnotation(pd.getWriteMethod(), annotation)
                 : result
                 ;
@@ -90,13 +94,14 @@ public class RdfClassFactory {
 
 
     protected RdfClass _create(Class<?> clazz) throws IntrospectionException {
+        PrefixMapping prefixMapping = prologue.getPrefixMapping();
 
         RdfType x = clazz.getAnnotation(RdfType.class);
         DefaultIri defaultIri = clazz.getAnnotation(DefaultIri.class);
 
         Function<Object, String> defaultIriFn = null;
         if(defaultIri != null) {
-            String iriStr = defaultIri.toString();
+            String iriStr = defaultIri.value();
             Expression expression = parser.parseExpression(iriStr, parserContext);
              defaultIriFn = new F_GetValue<String>(String.class, expression, evalContext);
         }
@@ -104,7 +109,8 @@ public class RdfClassFactory {
         Map<String, RdfProperty> rdfProperties = new LinkedHashMap<String, RdfProperty>();
 
         BeanInfo bi = Introspector.getBeanInfo(clazz);
-        for(PropertyDescriptor pd : bi.getPropertyDescriptors()) {
+        PropertyDescriptor[] pds = bi.getPropertyDescriptors();
+        for(PropertyDescriptor pd : pds) {
             String propertyName = pd.getName();
             System.out.println("PropertyName: " + propertyName);
 
@@ -112,8 +118,10 @@ public class RdfClassFactory {
             if(iri != null) {
                 String iriStr = iri.value();
 
+                //Relation relation = relationParser.apply(iriStr);
 
-                Relation relation = RelationUtils.createRelation(iriStr, false, null);
+
+                Relation relation = RelationUtils.createRelation(iriStr, false, prefixMapping);
 
                 RdfProperty rdfProperty = new RdfProperty(propertyName, relation);
                 rdfProperties.put(propertyName, rdfProperty);
@@ -122,7 +130,7 @@ public class RdfClassFactory {
             }
         }
 
-        RdfClass result = new RdfClass(clazz, defaultIriFn, rdfProperties);
+        RdfClass result = new RdfClass(clazz, defaultIriFn, rdfProperties, prologue);
         return result;
 
 
@@ -132,8 +140,13 @@ public class RdfClassFactory {
 //        System.out.println(rawIri);
     }
 
-
     public static RdfClassFactory createDefault() {
+        Prologue prologue = new Prologue();
+        RdfClassFactory result = createDefault(prologue);
+        return result;
+    }
+
+    public static RdfClassFactory createDefault(Prologue prologue) {
         StandardEvaluationContext evalContext = new StandardEvaluationContext();
         TemplateParserContext parserContext = new TemplateParserContext();
 
@@ -144,9 +157,9 @@ public class RdfClassFactory {
         }
         ExpressionParser parser = new SpelExpressionParser();
 
-        SparqlRelationParser relationParser = new SparqlRelationParserImpl();
+        SparqlRelationParser relationParser = SparqlRelationParserImpl.create(Syntax.syntaxARQ, prologue);
 
-        RdfClassFactory result = new RdfClassFactory(parser, parserContext, evalContext, relationParser);
+        RdfClassFactory result = new RdfClassFactory(parser, parserContext, evalContext, prologue, relationParser);
         return result;
     }
 }

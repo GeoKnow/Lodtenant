@@ -35,6 +35,10 @@ public class Workflow {
         return content;
     }
 
+    public void setContent(String content) {
+        this.content = content;
+    }
+
     public User getOwner() {
         return owner;
     }

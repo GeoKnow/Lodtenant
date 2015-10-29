@@ -2,6 +2,7 @@ package org.aksw.rdfmap.model;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.aksw.jena_sparql_api.batch.ResourceShapeBuilder;
@@ -9,18 +10,25 @@ import org.aksw.jena_sparql_api.concepts.Relation;
 import org.aksw.jena_sparql_api.concepts.RelationUtils;
 import org.aksw.jena_sparql_api.mapper.MappedConcept;
 import org.aksw.jena_sparql_api.shape.ResourceShape;
+import org.aksw.lodtenant.cli.ListObjectsOfDatasetGraph;
 import org.aksw.rdfmap.proxy.MethodInterceptorRdf;
+import org.springframework.beans.BeanWrapper;
+import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.cglib.proxy.Callback;
 import org.springframework.cglib.proxy.Enhancer;
 import org.springframework.cglib.proxy.Factory;
 
 import com.google.common.base.Function;
+import com.hp.hpl.jena.datatypes.RDFDatatype;
+import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.graph.Triple;
+import com.hp.hpl.jena.shared.PrefixMapping;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
 import com.hp.hpl.jena.sparql.core.Prologue;
+import com.hp.hpl.jena.sparql.core.Quad;
 
 public class RdfClass {
     /**
@@ -34,16 +42,17 @@ public class RdfClass {
     //protected String defaultIriExpr;
     protected Function<Object, String> defaultIriFn;
 
-    protected Prologue prologue = new Prologue();
+    protected Prologue prologue;
 
 
 
     public RdfClass(Class<?> targetClass, Function<Object, String> defaultIriFn,
-            Map<String, RdfProperty> propertyToMapping) {
+            Map<String, RdfProperty> propertyToMapping, Prologue prologue) {
         super();
         this.targetClass = targetClass;
         this.defaultIriFn = defaultIriFn;
         this.propertyToMapping = propertyToMapping;
+        this.prologue = prologue;
     }
 
 
@@ -87,6 +96,8 @@ public class RdfClass {
 
         if(result == null) {
             String str = defaultIriFn != null ? defaultIriFn.apply(o) : null;
+            str = prologue.getPrefixMapping().expandPrefix(str);
+
             result = str != null ? NodeFactory.createURI(str) : null;
         }
 
@@ -94,17 +105,101 @@ public class RdfClass {
     }
 
 
-    public DatasetGraph createDatasetGraph(Object o) {
+    public Object toJava(Node node) {
+        Object result;
+        if(node == null) {
+            result = null;
+        } else if(node.isURI()) {
+            result = node.getURI();
+        } else if(node.isLiteral()) {
+            result = node.getLiteralValue();
+        } else { //if(node.isBlank()) {
+            throw new RuntimeException("not supported (yet)");
+        }
+
+        return result;
+    }
+
+
+    public void setValues(Object obj, DatasetGraph datasetGraph) {
+        PrefixMapping prefixMapping = prologue.getPrefixMapping();
+
         DatasetGraph result = DatasetGraphFactory.createMem();
         Collection<RdfProperty> rdfProperties = propertyToMapping.values();
-        Node s = getSubject(o);
+
+        BeanWrapper bean = new BeanWrapperImpl(obj);
+
+        Node s = getSubject(obj);
+        TypeMapper typeMapper = TypeMapper.getInstance();
 
         for(RdfProperty pd : rdfProperties) {
+            String propertyName = pd.getName();
+            Object propertyValue = bean.getPropertyValue(propertyName);
+
+            System.out.println("Value of " + propertyName + " = " + propertyValue);
+
             Relation relation = pd.getRelation();
             Triple t = RelationUtils.extractTriple(relation);
             if(t != null) {
-                Node p = t.getPredicate();
-                int i = 0;
+                Node pRaw = t.getPredicate();
+                if(Node.ANY.equals(pRaw)) {
+                    throw new RuntimeException("Could not obtain a valid RDF property for bean property " + propertyName + " with value " + propertyValue);
+                }
+
+                String pStr = prefixMapping.expandPrefix(pRaw.getURI());
+                Node p = NodeFactory.createURI(pStr);
+
+                // Get the value of the triple
+                List<Node> os = ListObjectsOfDatasetGraph.create(datasetGraph, Node.ANY, s, p);
+                Node o = os.isEmpty() ? null : os.iterator().next();
+
+                // Convert o to java
+                Object java = toJava(o);
+
+                bean.setPropertyValue(propertyName, java);
+            }
+        }
+    }
+
+    public DatasetGraph createDatasetGraph(Object obj) {
+        PrefixMapping prefixMapping = prologue.getPrefixMapping();
+
+        Class<?> clazz = obj.getClass();
+        DatasetGraph result = DatasetGraphFactory.createMem();
+        Collection<RdfProperty> rdfProperties = propertyToMapping.values();
+
+        BeanWrapper bean = new BeanWrapperImpl(obj);
+
+        Node s = getSubject(obj);
+
+        for(RdfProperty pd : rdfProperties) {
+            String propertyName = pd.getName();
+            Object propertyValue = bean.getPropertyValue(propertyName);
+            Class<?> propertyClass = propertyValue.getClass();
+
+            System.out.println("Value of " + propertyName + " = " + propertyValue);
+
+            Relation relation = pd.getRelation();
+            Triple t = RelationUtils.extractTriple(relation);
+            if(t != null) {
+                Node pRaw = t.getPredicate();
+                if(Node.ANY.equals(pRaw)) {
+                    throw new RuntimeException("Could not obtain a valid RDF property for bean property " + propertyName + " with value " + propertyValue);
+                }
+
+                String pStr = prefixMapping.expandPrefix(pRaw.getURI());
+                Node p = NodeFactory.createURI(pStr);
+
+                TypeMapper typeMapper = TypeMapper.getInstance();
+                RDFDatatype datatype = typeMapper.getTypeByClass(propertyClass);
+                String lex = datatype.unparse(propertyValue);
+                Node o = NodeFactory.createLiteral(lex, datatype);
+
+                Quad quad = new Quad(Quad.defaultGraphIRI, s, p, o);
+                result.add(quad);
+                // TODO Now apply lang filtering
+
+                //int i = 0;
 
                 //Node o = rep;
             }
@@ -129,9 +224,6 @@ public class RdfClass {
      */
     public Object createProxy(DatasetGraph datasetGraph, Node subject) {
 
-
-
-
         Object o;
         try {
             o = targetClass.newInstance();
@@ -139,7 +231,7 @@ public class RdfClass {
             throw new RuntimeException(e);
         }
 
-        MethodInterceptorRdf interceptor = new MethodInterceptorRdf(o, subject, datasetGraph);
+        MethodInterceptorRdf interceptor = new MethodInterceptorRdf(o, this, subject, datasetGraph);
         //new Class<?>[] { ProxiedRdf.class }
 //        Object result = Enhancer.create(targetClass, null, interceptor);
         Object result = Enhancer.create(targetClass, null, interceptor);
