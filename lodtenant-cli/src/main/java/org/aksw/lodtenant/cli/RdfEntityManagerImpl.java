@@ -14,6 +14,7 @@ import org.aksw.jena_sparql_api.core.utils.UpdateExecutionUtils;
 import org.aksw.jena_sparql_api.lookup.LookupService;
 import org.aksw.jena_sparql_api.lookup.LookupServiceUtils;
 import org.aksw.jena_sparql_api.mapper.MappedConcept;
+import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
 import org.aksw.jena_sparql_api.utils.DatasetGraphUtils;
 import org.aksw.rdfmap.model.RdfClass;
 import org.aksw.rdfmap.model.RdfClassFactory;
@@ -21,6 +22,7 @@ import org.aksw.rdfmap.proxy.MethodInterceptorRdf;
 
 import com.hp.hpl.jena.graph.Node;
 import com.hp.hpl.jena.graph.NodeFactory;
+import com.hp.hpl.jena.sparql.core.DatasetDescription;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
 import com.hp.hpl.jena.sparql.core.Prologue;
@@ -105,8 +107,14 @@ public class RdfEntityManagerImpl
         RdfClass rdfClass = RdfClassFactory.createDefault(prologue).create(clazz);
 
 
+        DatasetDescription datasetDescription = sparqlService.getDatasetDescription();
+        String gStr = DatasetDescriptionUtils.getSingleDefaultGraphUri(datasetDescription);
+        if(gStr == null) {
+            throw new RuntimeException("No target graph specified");
+        }
+        Node g = NodeFactory.createURI(gStr);
 
-        DatasetGraph newState = rdfClass.createDatasetGraph(object);
+        DatasetGraph newState = rdfClass.createDatasetGraph(object, g);
 
         System.out.println("oldState");
         DatasetGraphUtils.write(System.out, oldState);

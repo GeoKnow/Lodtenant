@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.aksw.jena_sparql_api.core.SparqlService;
 import org.aksw.jena_sparql_api.update.FluentSparqlService;
+import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
 import org.aksw.lodtenant.manager.domain.User;
 import org.aksw.lodtenant.manager.domain.Workflow;
 import org.aksw.rdfmap.model.RdfClass;
@@ -150,6 +151,8 @@ public class MainRdfAnnotation {
         SparqlService ss = FluentSparqlService.http("http://localhost:8890/sparql", "http://rdfmap.org/").create();
         RdfEntityManager entityManager = new RdfEntityManagerImpl(prologue, null, ss);
 
+
+        System.out.println(DatasetDescriptionUtils.toString(ss.getDatasetDescription()));
 
         Workflow wa = entityManager.find(Workflow.class, "http://example.org/99914b932bd37a50b983c5e7c90ae93b-franz");
 

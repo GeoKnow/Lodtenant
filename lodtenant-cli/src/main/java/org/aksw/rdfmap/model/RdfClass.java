@@ -161,7 +161,7 @@ public class RdfClass {
         }
     }
 
-    public DatasetGraph createDatasetGraph(Object obj) {
+    public DatasetGraph createDatasetGraph(Object obj, Node g) {
         PrefixMapping prefixMapping = prologue.getPrefixMapping();
 
         Class<?> clazz = obj.getClass();
@@ -195,7 +195,8 @@ public class RdfClass {
                 String lex = datatype.unparse(propertyValue);
                 Node o = NodeFactory.createLiteral(lex, datatype);
 
-                Quad quad = new Quad(Quad.defaultGraphIRI, s, p, o);
+                //datasetDescription.getDefaultGraphURIs()
+                Quad quad = new Quad(g, s, p, o);
                 result.add(quad);
                 // TODO Now apply lang filtering
 
