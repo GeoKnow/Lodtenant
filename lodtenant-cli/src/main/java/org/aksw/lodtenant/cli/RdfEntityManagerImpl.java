@@ -3,10 +3,13 @@ package org.aksw.lodtenant.cli;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.aksw.commons.collections.diff.Diff;
 import org.aksw.jena_sparql_api.core.QueryExecutionFactory;
 import org.aksw.jena_sparql_api.core.SparqlService;
 import org.aksw.jena_sparql_api.core.UpdateExecutionFactory;
+import org.aksw.jena_sparql_api.core.utils.UpdateDiffUtils;
 import org.aksw.jena_sparql_api.core.utils.UpdateExecutionUtils;
 import org.aksw.jena_sparql_api.lookup.LookupService;
 import org.aksw.jena_sparql_api.lookup.LookupServiceUtils;
@@ -21,6 +24,7 @@ import com.hp.hpl.jena.graph.NodeFactory;
 import com.hp.hpl.jena.sparql.core.DatasetGraph;
 import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
 import com.hp.hpl.jena.sparql.core.Prologue;
+import com.hp.hpl.jena.sparql.core.Quad;
 
 public class RdfEntityManagerImpl
     implements RdfEntityManager
@@ -104,9 +108,18 @@ public class RdfEntityManagerImpl
 
         DatasetGraph newState = rdfClass.createDatasetGraph(object);
 
+        System.out.println("oldState");
+        DatasetGraphUtils.write(System.out, oldState);
+
+        System.out.println("newState");
         DatasetGraphUtils.write(System.out, newState);
 
+        Diff<Set<Quad>> diff = UpdateDiffUtils.computeDelta(newState, oldState);
+        System.out.println("diff: " + diff);
         UpdateExecutionFactory uef = sparqlService.getUpdateExecutionFactory();
-        UpdateExecutionUtils.executeUpdateDelta(uef, newState, oldState);
+        UpdateExecutionUtils.executeUpdate(uef, diff);
+
+
+//        UpdateExecutionUtils.executeUpdateDelta(uef, newState, oldState);
     }
 }
