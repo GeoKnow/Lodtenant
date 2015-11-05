@@ -4,8 +4,8 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Root;
 
-import org.aksw.rdfmap.jpa.EntityManagerJena;
-import org.aksw.rdfmap.jpa.criteria.CriteriaBuilderJena;
+import org.aksw.jena_sparql_api.mapper.jpa.EntityManagerJena;
+import org.aksw.jena_sparql_api.mapper.jpa.criteria.CriteriaBuilderJena;
 
 public class EntityManagerUtils {
 

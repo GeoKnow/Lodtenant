@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import org.aksw.jena_sparql_api.utils.ListObjectsOfDatasetGraph;
 import org.aksw.jena_sparql_api.utils.ModelDiff;
-import org.aksw.lodtenant.cli.ListObjectsOfDatasetGraph;
 import org.aksw.lodtenant.cli.MapDatasetGraphRdfTerm;
 import org.aksw.lodtenant.cli.QuadCoordinate;
 import org.aksw.lodtenant.cli.TalisRdfTerm;

@@ -4,16 +4,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.ParameterExpression;
-import javax.persistence.criteria.Root;
-
 import org.aksw.jena_sparql_api.core.SparqlService;
+import org.aksw.jena_sparql_api.mapper.jpa.EntityManagerJena;
 import org.aksw.jena_sparql_api.update.FluentSparqlService;
 import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
 import org.aksw.lodtenant.manager.domain.Workflow;
-import org.aksw.rdfmap.jpa.EntityManagerJena;
-import org.aksw.rdfmap.jpa.criteria.CriteriaBuilderJena;
 
 import com.google.common.base.Supplier;
 import com.hp.hpl.jena.graph.Node;

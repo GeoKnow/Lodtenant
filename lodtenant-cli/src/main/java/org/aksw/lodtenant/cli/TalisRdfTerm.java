@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.aksw.jena_sparql_api.utils.ListObjectsOfDatasetGraph;
 import org.apache.jena.atlas.lib.MapUtils;
 
 import com.hp.hpl.jena.datatypes.RDFDatatype;

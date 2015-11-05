@@ -1,7 +1,8 @@
 package org.aksw.lodtenant.manager.domain;
 
-import org.aksw.rdfmap.annotation.DefaultIri;
-import org.aksw.rdfmap.annotation.Iri;
+import org.aksw.jena_sparql_api.mapper.annotation.DefaultIri;
+import org.aksw.jena_sparql_api.mapper.annotation.Iri;
+import org.aksw.jena_sparql_api.mapper.annotation.RdfType;
 
 @RdfType("foaf:Agent")
 @DefaultIri("user:#{name}")
