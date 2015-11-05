@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import org.aksw.jena_sparql_api.batch.BatchWorkflowManager;
+import org.aksw.jena_sparql_api.batch.SparqlBatchUtils;
 import org.aksw.jena_sparql_api.batch.cli.main.MainBatchWorkflow;
 import org.aksw.lodtenant.config.ConfigApp;
 import org.springframework.batch.core.Job;
@@ -99,6 +100,8 @@ public class MainLodtenantCli {
             System.out.println("Got " + allBeans.size() + " beans: " + allBeans);
 
             System.out.println("Job: " + job);
+
+            SparqlBatchUtils.cleanUp(batchContext);
 
             BatchWorkflowManager manager = batchContext
                     .getBean(BatchWorkflowManager.class);// new
