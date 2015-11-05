@@ -1,5 +1,7 @@
 package org.aksw.lodtenant.manager.domain;
 
+import java.util.List;
+
 import org.aksw.rdfmap.annotation.DefaultIri;
 import org.aksw.rdfmap.annotation.Iri;
 
@@ -12,10 +14,14 @@ import org.aksw.rdfmap.annotation.Iri;
 @RdfType("lodflow:Workflow") // TODO Possibly add flag to control removal behavior: remove-on-delete, remove-on-empty
 public class Workflow {
     //protected Set<String> aliases;
-    @Iri("o:foobar")
+    @Iri("o:content")
     protected String content;
 
     protected User owner;
+
+    @Iri("rdfs:label")
+    protected String alias;
+    //protected List<String> aliases;
 
     public Workflow() {
 
@@ -25,10 +31,11 @@ public class Workflow {
     // @Embedded("sub-uri")
     // @MappedBy("attributeOfForeignClass")
     // List<User> contributors;
-    public Workflow(String content, User owner) {
+    public Workflow(String content, User owner, String alias) {
         super();
         this.content = content;
         this.owner = owner;
+        this.alias = alias;
     }
 
     public String getContent() {
@@ -42,4 +49,17 @@ public class Workflow {
     public User getOwner() {
         return owner;
     }
+
+    public void setOwner(User owner) {
+        this.owner = owner;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public void setAlias(String alias) {
+        this.alias = alias;
+    }
+
 }

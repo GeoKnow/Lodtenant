@@ -164,7 +164,6 @@ public class RdfClass {
     public DatasetGraph createDatasetGraph(Object obj, Node g) {
         PrefixMapping prefixMapping = prologue.getPrefixMapping();
 
-        Class<?> clazz = obj.getClass();
         DatasetGraph result = DatasetGraphFactory.createMem();
         Collection<RdfProperty> rdfProperties = propertyToMapping.values();
 
@@ -175,34 +174,38 @@ public class RdfClass {
         for(RdfProperty pd : rdfProperties) {
             String propertyName = pd.getName();
             Object propertyValue = bean.getPropertyValue(propertyName);
-            Class<?> propertyClass = propertyValue.getClass();
 
-            System.out.println("Value of " + propertyName + " = " + propertyValue);
+            if(propertyValue != null) {
 
-            Relation relation = pd.getRelation();
-            Triple t = RelationUtils.extractTriple(relation);
-            if(t != null) {
-                Node pRaw = t.getPredicate();
-                if(Node.ANY.equals(pRaw)) {
-                    throw new RuntimeException("Could not obtain a valid RDF property for bean property " + propertyName + " with value " + propertyValue);
+                Class<?> propertyClass = propertyValue.getClass();
+
+                System.out.println("Value of " + propertyName + " = " + propertyValue);
+
+                Relation relation = pd.getRelation();
+                Triple t = RelationUtils.extractTriple(relation);
+                if(t != null) {
+                    Node pRaw = t.getPredicate();
+                    if(Node.ANY.equals(pRaw)) {
+                        throw new RuntimeException("Could not obtain a valid RDF property for bean property " + propertyName + " with value " + propertyValue);
+                    }
+
+                    String pStr = prefixMapping.expandPrefix(pRaw.getURI());
+                    Node p = NodeFactory.createURI(pStr);
+
+                    TypeMapper typeMapper = TypeMapper.getInstance();
+                    RDFDatatype datatype = typeMapper.getTypeByClass(propertyClass);
+                    String lex = datatype.unparse(propertyValue);
+                    Node o = NodeFactory.createLiteral(lex, datatype);
+
+                    //datasetDescription.getDefaultGraphURIs()
+                    Quad quad = new Quad(g, s, p, o);
+                    result.add(quad);
+                    // TODO Now apply lang filtering
+
+                    //int i = 0;
+
+                    //Node o = rep;
                 }
-
-                String pStr = prefixMapping.expandPrefix(pRaw.getURI());
-                Node p = NodeFactory.createURI(pStr);
-
-                TypeMapper typeMapper = TypeMapper.getInstance();
-                RDFDatatype datatype = typeMapper.getTypeByClass(propertyClass);
-                String lex = datatype.unparse(propertyValue);
-                Node o = NodeFactory.createLiteral(lex, datatype);
-
-                //datasetDescription.getDefaultGraphURIs()
-                Quad quad = new Quad(g, s, p, o);
-                result.add(quad);
-                // TODO Now apply lang filtering
-
-                //int i = 0;
-
-                //Node o = rep;
             }
         }
 

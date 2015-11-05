@@ -4,26 +4,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.ParameterExpression;
+import javax.persistence.criteria.Root;
+
 import org.aksw.jena_sparql_api.core.SparqlService;
 import org.aksw.jena_sparql_api.update.FluentSparqlService;
 import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
-import org.aksw.lodtenant.manager.domain.User;
 import org.aksw.lodtenant.manager.domain.Workflow;
-import org.aksw.rdfmap.model.RdfClass;
-import org.aksw.rdfmap.model.RdfClassFactory;
+import org.aksw.rdfmap.jpa.EntityManagerJena;
+import org.aksw.rdfmap.jpa.criteria.CriteriaBuilderJena;
 
-import com.google.common.base.Function;
 import com.google.common.base.Supplier;
-import com.hp.hpl.jena.datatypes.RDFDatatype;
-import com.hp.hpl.jena.datatypes.TypeMapper;
 import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.NodeFactory;
-import com.hp.hpl.jena.sparql.core.DatasetGraph;
-import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
 import com.hp.hpl.jena.sparql.core.Prologue;
-import com.hp.hpl.jena.sparql.core.Var;
-import com.hp.hpl.jena.sparql.engine.binding.BindingHashMap;
-import com.hp.hpl.jena.vocabulary.XSD;
 
 interface ValueHolder<T>
 {
@@ -144,24 +138,32 @@ class CoordinateGraph {
 
 
 public class MainRdfAnnotation {
+
+
     public static void main(String[] args) throws NoSuchMethodException, SecurityException {
 
         Prologue prologue = new Prologue();
         prologue.setPrefix("o", "http://example.org/");
         SparqlService ss = FluentSparqlService.http("http://localhost:8890/sparql", "http://rdfmap.org/").create();
-        RdfEntityManager entityManager = new RdfEntityManagerImpl(prologue, null, ss);
+        EntityManagerJena em = new EntityManagerJena(prologue, null, ss);
 
 
         System.out.println(DatasetDescriptionUtils.toString(ss.getDatasetDescription()));
 
-        Workflow wa = entityManager.find(Workflow.class, "http://example.org/99914b932bd37a50b983c5e7c90ae93b-franz");
+        //Workflow wa = em.find(Workflow.class, "http://example.org/99914b932bd37a50b983c5e7c90ae93b-franz");
 
-        if(wa == null) {
-            wa = new Workflow("{}", new User("franz"));
-        }
+        Workflow wa = EntityManagerUtils.findByAttribute(em, Workflow.class, "alias", "my-workflow");
 
-        wa.setContent("yaaaaay");
 
-        entityManager.merge(wa);
+
+
+//        if(wa == null) {
+//            wa = new Workflow("{}", new User("franz"), "franz");
+//        }
+        System.out.println("test: " + wa.getContent());
+
+        //wa.setContent("yaaaaay");
+
+        em.merge(wa);
     }
 }
