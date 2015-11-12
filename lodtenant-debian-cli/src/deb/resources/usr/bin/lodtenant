@@ -1,0 +1,4 @@
+#!/bin/sh
+
+java -cp "/usr/share/lib/lodtenant-cli/lodtenant-cli.jar" org.aksw.lodtenant.cli.MainLodtenantCli "$@"
+

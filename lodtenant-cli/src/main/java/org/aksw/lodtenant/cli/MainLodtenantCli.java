@@ -1,13 +1,19 @@
 package org.aksw.lodtenant.cli;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.aksw.jena_sparql_api.batch.BatchWorkflowManager;
 import org.aksw.jena_sparql_api.batch.SparqlBatchUtils;
 import org.aksw.jena_sparql_api.batch.cli.main.MainBatchWorkflow;
 import org.aksw.lodtenant.config.ConfigApp;
+import org.aksw.lodtenant.manager.domain.Workflow;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.job.SimpleJob;
@@ -41,6 +47,18 @@ public class MainLodtenantCli {
 
     public static final String CONFIG = "c";
 
+    List<Workflow> testDeleteme = new ArrayList<Workflow>();
+
+    public void foobar() throws NoSuchFieldException, SecurityException {
+        Class<?> clazz = testDeleteme.getClass();
+        Field stringListField = clazz.getDeclaredField("stringList");
+        //stringListField.getDeclaringClass()
+        //stringListField.getg
+        //stringListField.getGe
+        //Type x;
+        ParameterizedType stringListType = (ParameterizedType) stringListField.getGenericType();
+        Class<?> stringListClass = (Class<?>) stringListType.getActualTypeArguments()[0];    }
+
     /**
      * Life cycle management functions for job executions
      *
@@ -52,6 +70,8 @@ public class MainLodtenantCli {
 
 
     public static void main(String[] args) throws Exception {
+
+
         OptionParser parser = new OptionParser();
         parser.accepts("c", "config").withRequiredArg().ofType(File.class).describedAs("config");//.defaultsTo(null);
         parser.accepts(REGISTER).withRequiredArg();
@@ -76,6 +96,9 @@ public class MainLodtenantCli {
             String configFileName = (String)options.valueOf(CONFIG);
 
         }
+
+        //List<Integer> x; x.getClass().getSimpleName();
+
 
         if (options.has(REGISTER)) {
             String workflow = (String) options.valueOf(REGISTER);

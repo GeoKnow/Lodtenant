@@ -9,7 +9,7 @@ import org.aksw.jena_sparql_api.mapper.annotation.RdfType;
 // By default, classes are 'TypeIdentifiable', this means, that instances of a class
 // can be collected by instances of the given RdfType
 // Note: this annotation creates a default id, it is not mandatory for existing instances to follow this pattern
-@DefaultIri("o:#{#md5(content)}-#{owner.name}")
+@DefaultIri("o:workflow-#{#md5(content)}-#{owner.name}")
 @RdfType("lodflow:Workflow") // TODO Possibly add flag to control removal behavior: remove-on-delete, remove-on-empty
 public class Workflow {
     //protected Set<String> aliases;
