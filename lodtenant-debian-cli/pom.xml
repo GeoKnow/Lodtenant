@@ -11,9 +11,6 @@
     <artifactId>lodtenant-debian-cli</artifactId>
     <packaging>war</packaging>
 
-
-    <name>Lodtenant - Debian - CLI</name>
-
     <properties>
         <deb.packageName>lodtenant-cli</deb.packageName>
     </properties>

@@ -9,9 +9,8 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>lodtenant-cli</artifactId>
-    <packaging>jar</packaging>
-
+    <artifactId>lodtenant-web</artifactId>
+    <packaging>war</packaging>
 
     <dependencies>
         <dependency>
@@ -20,8 +19,8 @@
         </dependency>
 
         <dependency>
-            <groupId>net.sf.jopt-simple</groupId>
-            <artifactId>jopt-simple</artifactId>
+            <groupId>org.aksw.jena-sparql-api</groupId>
+            <artifactId>jena-sparql-api-server</artifactId>
         </dependency>
 
         <!-- Testing -->

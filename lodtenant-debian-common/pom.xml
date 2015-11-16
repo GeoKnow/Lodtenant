@@ -12,8 +12,6 @@
     <packaging>war</packaging>
 
 
-    <name>Lodtenant - Debian - Common</name>
-
     <properties>
         <deb.packageName>lodtenant-common</deb.packageName>
     </properties>

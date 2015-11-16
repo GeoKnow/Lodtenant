@@ -14,9 +14,12 @@
     <url>https://github.com/GeoKnow/Lodtenant</url>
 
     <modules>
+        <module>lodtenant-core</module>
+        <module>lodtenant-web</module>
         <module>lodtenant-cli</module>
         <module>lodtenant-debian-common</module>
         <module>lodtenant-debian-cli</module>
+        <module>lodtenant-debian-tomcat7</module>
     </modules>
 
     <issueManagement>
@@ -203,11 +206,19 @@
 
     <dependencyManagement>
         <dependencies>
+
+            <dependency>
+                <groupId>org.aksw.lodtenant</groupId>
+                <artifactId>lodtenant-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+
             <!-- Modules -->
             <dependency>
                 <groupId>org.aksw.gson</groupId>
                 <artifactId>gson-utils-core</artifactId>
-                <version>${project.version}</version>
+                <version>1.0.0-SNAPSHOT</version>
             </dependency>
 
             <dependency>
@@ -231,6 +242,12 @@
             <dependency>
                 <groupId>org.aksw.jena-sparql-api</groupId>
                 <artifactId>jena-sparql-api-batch</artifactId>
+                <version>${jena-sparql-api.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.aksw.jena-sparql-api</groupId>
+                <artifactId>jena-sparql-api-server</artifactId>
                 <version>${jena-sparql-api.version}</version>
             </dependency>
 

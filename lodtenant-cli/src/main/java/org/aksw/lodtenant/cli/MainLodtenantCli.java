@@ -1,9 +1,9 @@
 package org.aksw.lodtenant.cli;
 
 import java.io.File;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -12,6 +12,7 @@ import java.util.List;
 import org.aksw.jena_sparql_api.batch.BatchWorkflowManager;
 import org.aksw.jena_sparql_api.batch.SparqlBatchUtils;
 import org.aksw.jena_sparql_api.batch.cli.main.MainBatchWorkflow;
+import org.aksw.jena_sparql_api.beans.json.JsonProcessorContext;
 import org.aksw.lodtenant.config.ConfigApp;
 import org.aksw.lodtenant.manager.domain.Workflow;
 import org.springframework.batch.core.Job;
@@ -20,10 +21,19 @@ import org.springframework.batch.core.job.SimpleJob;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.JOptCommandLinePropertySource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.stream.JsonReader;
+
+import joptsimple.ArgumentAcceptingOptionSpec;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
+import joptsimple.OptionSpec;
 
 public class MainLodtenantCli {
 
@@ -73,11 +83,48 @@ public class MainLodtenantCli {
 
 
         OptionParser parser = new OptionParser();
-        parser.accepts("c", "config").withRequiredArg().ofType(File.class).describedAs("config");//.defaultsTo(null);
-        parser.accepts(REGISTER).withRequiredArg();
+
+        OptionSpec<File> configFileOs = parser
+                .acceptsAll(Arrays.asList("c", "config"))
+                .withRequiredArg()
+                .ofType(File.class)
+                .describedAs("Configuration of the context in which workflows run").required();//.defaultsTo(null);
+
+        OptionSpec<File> jobFileOs = parser
+                .acceptsAll(Arrays.asList("j", "job"))
+                .withRequiredArg()
+                .ofType(File.class)
+                .describedAs("File containing the job definition");
+
+        OptionSpec<String> jobIdOs = parser
+                .acceptsAll(Arrays.asList("i", "id"))
+                .withRequiredArg()
+                .ofType(String.class)
+                .describedAs("Job identifier");
+
+        OptionSpec<File> jobParamsOs = parser
+                .acceptsAll(Arrays.asList("p", "params"))
+                .withRequiredArg()
+                .ofType(File.class)
+                .describedAs("Job parameter file");
+
+        OptionSpec<File> registerOs = parser
+                .acceptsAll(Arrays.asList("register"))
+                    .withRequiredArg()
+                    .ofType(File.class)
+                .describedAs("Registers a new job template");
+
+        OptionSpec<File> prepareOs = parser
+                .acceptsAll(Arrays.asList("prepare"))
+                .withRequiredArg()
+                    .describedAs("job alias")
+                    .ofType(File.class)
+                .describedAs("Create a job instance");
+
+
+
         parser.accepts(PREPARE).withRequiredArg();
         parser.accepts(START).withRequiredArg();
-
 
         parser.printHelpOn(System.err);
 
@@ -91,11 +138,31 @@ public class MainLodtenantCli {
         appContext.register(ConfigApp.class);
         appContext.refresh();
 
-        // new OptionSpecBuilder().
-        if (options.has(CONFIG)) {
-            String configFileName = (String)options.valueOf(CONFIG);
+        Gson gson = appContext.getBean(Gson.class);
 
+        // new OptionSpecBuilder().
+        if (options.has(configFileOs)) {
+            File configFile = configFileOs.value(options);
+
+            Resource configResource = new FileSystemResource(configFile);
+            JsonReader jsonReader = new JsonReader(new InputStreamReader(configResource.getInputStream()));
+            jsonReader.setLenient(true);
+
+            JsonElement json = gson.fromJson(jsonReader, JsonElement.class);
+            json = MainBatchWorkflow.rewrite(json);
+
+            String str = gson.toJson(json);
+            System.out.println(str);
+
+
+            GenericApplicationContext configContext = new GenericApplicationContext();
+            configContext.setParent(appContext);
+            JsonProcessorContext contextProcessor = new JsonProcessorContext(configContext);
+            contextProcessor.process(json);
+            configContext.refresh();
         }
+
+
 
         //List<Integer> x; x.getClass().getSimpleName();
 

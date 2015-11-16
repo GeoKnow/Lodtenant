@@ -9,19 +9,38 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>lodtenant-cli</artifactId>
+    <artifactId>lodtenant-core</artifactId>
     <packaging>jar</packaging>
-
 
     <dependencies>
         <dependency>
-            <groupId>org.aksw.lodtenant</groupId>
-            <artifactId>lodtenant-core</artifactId>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
 
         <dependency>
             <groupId>net.sf.jopt-simple</groupId>
             <artifactId>jopt-simple</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.aksw.jena-sparql-api</groupId>
+            <artifactId>jena-sparql-api-batch</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.aksw.jena-sparql-api</groupId>
+            <artifactId>jena-sparql-api-mapper</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
         </dependency>
 
         <!-- Testing -->
@@ -33,4 +52,3 @@
         </dependency>
     </dependencies>
 </project>
-
