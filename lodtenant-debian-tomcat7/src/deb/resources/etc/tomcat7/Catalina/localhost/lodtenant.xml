@@ -1,9 +1,10 @@
-<Context path="/lodtenant"
-   docBase="/usr/share/lib/lodtenant-tomcat7/lodtenant-tomcat7.war"
-   crossContext="false"
-   reloadable="false">
+<Context
+  path="/lodtenant"
+  docBase="/usr/share/lib/lodtenant-tomcat7/lodtenant-tomcat7.war"
+  crossContext="false"
+  reloadable="false">
 
-   <Resource
+    <Resource
       name="jdbc/lodtenantDs"
       auth="Container"
       type="javax.sql.DataSource"
@@ -26,11 +27,17 @@
    />
 
     <Parameter
-        name="contextConfigLocation"
-        value="workaround-for-JERSEY-2038"
-        override="false"
+      name="lodtenantConfigLocation"
+      value="/etc/lodtenant/lodtenant.conf"
+      override="true"
     />
 
+    <Parameter
+      name="contextConfigLocation"
+      value="workaround-for-JERSEY-2038"
+      override="false"
+    />
 
 </Context>
+
 

@@ -11,7 +11,7 @@ import org.aksw.jena_sparql_api.mapper.annotation.RdfType;
 // Note: this annotation creates a default id, it is not mandatory for existing instances to follow this pattern
 @DefaultIri("o:workflow-#{#md5(content)}-#{owner.name}")
 @RdfType("lodflow:Workflow") // TODO Possibly add flag to control removal behavior: remove-on-delete, remove-on-empty
-public class Workflow {
+public class WorkflowSpec {
     //protected Set<String> aliases;
     @Iri("o:content")
     protected String content;
@@ -22,7 +22,7 @@ public class Workflow {
     protected String alias;
     //protected List<String> aliases;
 
-    public Workflow() {
+    public WorkflowSpec() {
 
     }
 
@@ -30,7 +30,7 @@ public class Workflow {
     // @Embedded("sub-uri")
     // @MappedBy("attributeOfForeignClass")
     // List<User> contributors;
-    public Workflow(String content, User owner, String alias) {
+    public WorkflowSpec(String content, User owner, String alias) {
         super();
         this.content = content;
         this.owner = owner;

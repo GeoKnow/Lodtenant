@@ -9,19 +9,22 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.aksw.gson.utils.JsonWalker;
 import org.aksw.jena_sparql_api.batch.BatchWorkflowManager;
 import org.aksw.jena_sparql_api.batch.SparqlBatchUtils;
 import org.aksw.jena_sparql_api.batch.cli.main.MainBatchWorkflow;
+import org.aksw.jena_sparql_api.batch.config.ConfigSparqlServicesCore;
+import org.aksw.jena_sparql_api.batch.json.domain.JsonVisitorRewriteBeans;
 import org.aksw.jena_sparql_api.beans.json.JsonProcessorContext;
+import org.aksw.jena_sparql_api.core.SparqlServiceFactory;
 import org.aksw.lodtenant.config.ConfigApp;
-import org.aksw.lodtenant.manager.domain.Workflow;
+import org.aksw.lodtenant.manager.domain.WorkflowSpec;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.job.SimpleJob;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.JOptCommandLinePropertySource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -30,7 +33,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonReader;
 
-import joptsimple.ArgumentAcceptingOptionSpec;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
@@ -57,7 +59,7 @@ public class MainLodtenantCli {
 
     public static final String CONFIG = "c";
 
-    List<Workflow> testDeleteme = new ArrayList<Workflow>();
+    List<WorkflowSpec> testDeleteme = new ArrayList<WorkflowSpec>();
 
     public void foobar() throws NoSuchFieldException, SecurityException {
         Class<?> clazz = testDeleteme.getClass();
@@ -133,7 +135,10 @@ public class MainLodtenantCli {
 
         JOptCommandLinePropertySource clps = new JOptCommandLinePropertySource(options);
 
+//        QualifierAnnotationAutowireCandidateResolver autowireCandidateResolver = new QualifierAnnotationAutowireCandidateResolver();
+
         AnnotationConfigApplicationContext appContext = new AnnotationConfigApplicationContext();
+        //((DefaultListableBeanFactory)appContext.getBeanFactory()).setAutowireCandidateResolver(autowireCandidateResolver);
         appContext.getEnvironment().getPropertySources().addFirst(clps);
         appContext.register(ConfigApp.class);
         appContext.refresh();
@@ -141,6 +146,14 @@ public class MainLodtenantCli {
         Gson gson = appContext.getBean(Gson.class);
 
         // new OptionSpecBuilder().
+
+//        DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
+//        beanFactory.setAutowireCandidateResolver(candidateResolver);
+        AnnotationConfigApplicationContext configContext = new AnnotationConfigApplicationContext();
+        //((DefaultListableBeanFactory)configContext.getBeanFactory()).setAutowireCandidateResolver(autowireCandidateResolver);
+        //System.out.println("FFS: " + ((DefaultListableBeanFactory)configContext.getBeanFactory()).getAutowireCandidateResolver().getClass());
+        configContext.setParent(appContext);
+
         if (options.has(configFileOs)) {
             File configFile = configFileOs.value(options);
 
@@ -151,18 +164,33 @@ public class MainLodtenantCli {
             JsonElement json = gson.fromJson(jsonReader, JsonElement.class);
             json = MainBatchWorkflow.rewrite(json);
 
+            json = JsonWalker.rewriteUntilNoChange(json, new JsonVisitorRewriteBeans());
+
+
             String str = gson.toJson(json);
             System.out.println(str);
 
 
-            GenericApplicationContext configContext = new GenericApplicationContext();
-            configContext.setParent(appContext);
             JsonProcessorContext contextProcessor = new JsonProcessorContext(configContext);
             contextProcessor.process(json);
-            configContext.refresh();
         }
 
+        configContext.refresh();
 
+//        System.out.println("CONFIG CONTEXT: " + Arrays.asList(configContext.getBeanDefinitionNames()));
+//        DefaultListableBeanFactory bf = (DefaultListableBeanFactory)configContext.getBeanFactory();
+//        bf.getBean
+
+        //System.out.println("GOT BEAN: " + BeanFactoryAnnotationUtils.qualifiedBeanOfType(configContext.getBeanFactory(), SparqlService.class, "logging"));
+
+        AnnotationConfigApplicationContext workflowContext = new AnnotationConfigApplicationContext();
+        workflowContext.setParent(configContext);
+        workflowContext.register(ConfigSparqlServicesCore.class);
+        workflowContext.refresh();
+
+//        SparqlServiceFactory defaultSparqlServiceFactory = workflowContext.getBean(SparqlServiceFactory.class);
+//        System.out.println("DefaultSparqlServiceFactory: " + defaultSparqlServiceFactory);
+//        System.exit(0);
 
         //List<Integer> x; x.getClass().getSimpleName();
 

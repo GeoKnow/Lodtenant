@@ -8,7 +8,7 @@ import org.aksw.jena_sparql_api.core.SparqlService;
 import org.aksw.jena_sparql_api.mapper.jpa.EntityManagerJena;
 import org.aksw.jena_sparql_api.update.FluentSparqlService;
 import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
-import org.aksw.lodtenant.manager.domain.Workflow;
+import org.aksw.lodtenant.manager.domain.WorkflowSpec;
 
 import com.google.common.base.Supplier;
 import com.hp.hpl.jena.graph.Node;
@@ -147,7 +147,7 @@ public class MainRdfAnnotation {
 
         //Workflow wa = em.find(Workflow.class, "http://example.org/99914b932bd37a50b983c5e7c90ae93b-franz");
 
-        Workflow wa = EntityManagerUtils.findByAttribute(em, Workflow.class, "alias", "my-workflow");
+        WorkflowSpec wa = EntityManagerUtils.findByAttribute(em, WorkflowSpec.class, "alias", "my-workflow");
 
 
 
