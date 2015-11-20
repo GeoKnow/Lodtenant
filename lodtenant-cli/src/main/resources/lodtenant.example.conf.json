@@ -9,7 +9,8 @@
   } },
   'lodtenant.batch.db.populate': true,
   'sparqlService:tracking': { $sparqlService: ['#{ defaultSparqlServiceUrl }', 'http://lodtenant.aksw.org/tracker/'] },
-  'sparqlService:logging': { $sparqlService: ['#{ defaultSparqlServiceUrl }', 'http://lodtenant.aksw.org/log/'] }
+  'sparqlService:logging': { $sparqlService: ['#{ defaultSparqlServiceUrl }', 'http://lodtenant.aksw.org/log/'] },
+  'sparqlService:jobRepo': { $sparqlService: ['#{ defaultSparqlServiceUrl }', 'http://lodtenant.aksw.org/repo/'] }
 
 //  'lodtenant.tracker.sparqlService:tracking': { $sparqlService: ['#{ defaultSparqlServiceUrl }', 'http://lodtenant.aksw.org/tracker/'] },
 //  'lodtenant.logger.sparqlService:logging': { $sparqlService: ['#{ defaultSparqlServiceUrl }', 'http://lodtenant.aksw.org/log/'] }

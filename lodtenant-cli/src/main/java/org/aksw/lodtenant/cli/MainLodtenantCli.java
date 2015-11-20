@@ -18,11 +18,16 @@ import org.aksw.jena_sparql_api.batch.json.domain.JsonVisitorRewriteBeans;
 import org.aksw.jena_sparql_api.beans.json.JsonProcessorContext;
 import org.aksw.jena_sparql_api.core.SparqlServiceFactory;
 import org.aksw.lodtenant.config.ConfigApp;
-import org.aksw.lodtenant.manager.domain.WorkflowSpec;
+import org.aksw.lodtenant.config.ConfigJob;
+import org.aksw.lodtenant.core.interfaces.JobManager;
+import org.aksw.lodtenant.repo.rdf.JobSpec;
 import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.job.SimpleJob;
+import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.launch.JobOperator;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.JOptCommandLinePropertySource;
@@ -59,7 +64,7 @@ public class MainLodtenantCli {
 
     public static final String CONFIG = "c";
 
-    List<WorkflowSpec> testDeleteme = new ArrayList<WorkflowSpec>();
+    List<JobSpec> testDeleteme = new ArrayList<JobSpec>();
 
     public void foobar() throws NoSuchFieldException, SecurityException {
         Class<?> clazz = testDeleteme.getClass();
@@ -83,6 +88,11 @@ public class MainLodtenantCli {
 
     public static void main(String[] args) throws Exception {
 
+//        JobLauncher x;
+//        JobExecution y = x.run(job, jobParameters);
+//        y.
+//        JobRepository x;
+//        x.ge
 
         OptionParser parser = new OptionParser();
 
@@ -90,7 +100,8 @@ public class MainLodtenantCli {
                 .acceptsAll(Arrays.asList("c", "config"))
                 .withRequiredArg()
                 .ofType(File.class)
-                .describedAs("Configuration of the context in which workflows run").required();//.defaultsTo(null);
+                .describedAs("Configuration of the context in which workflows run")
+                .required();//.defaultsTo(null);
 
         OptionSpec<File> jobFileOs = parser
                 .acceptsAll(Arrays.asList("j", "job"))
@@ -186,7 +197,23 @@ public class MainLodtenantCli {
         AnnotationConfigApplicationContext workflowContext = new AnnotationConfigApplicationContext();
         workflowContext.setParent(configContext);
         workflowContext.register(ConfigSparqlServicesCore.class);
+        workflowContext.register(ConfigJob.class);
         workflowContext.refresh();
+
+
+
+        JobManager jobManager = workflowContext.getBean(JobManager.class);
+        String jobId = jobManager.registerJob("{foo: bar}");
+        System.out.println("jobId: " + jobId);
+
+        String jobInstanceId = jobManager.createJobInstance(jobId, "{some: params}");
+        System.out.println("jobInstanceId: " + jobInstanceId);
+
+        String jobExecutionId = jobManager.createJobExecution(jobInstanceId);
+        System.out.println("jobExecutionId: " + jobExecutionId);
+
+
+
 
 //        SparqlServiceFactory defaultSparqlServiceFactory = workflowContext.getBean(SparqlServiceFactory.class);
 //        System.out.println("DefaultSparqlServiceFactory: " + defaultSparqlServiceFactory);
@@ -195,10 +222,10 @@ public class MainLodtenantCli {
         //List<Integer> x; x.getClass().getSimpleName();
 
 
-        if (options.has(REGISTER)) {
-            String workflow = (String) options.valueOf(REGISTER);
+        if (options.has(registerOs)) {
+            File workflow = registerOs.value(options);
 
-            ApplicationContext baseContext = MainBatchWorkflow.initBaseContext(appContext);
+            ApplicationContext baseContext = MainBatchWorkflow.initBaseContext(workflowContext);
             MainBatchWorkflow.initJenaExtensions(baseContext);
             ApplicationContext batchContext = MainBatchWorkflow.initContext(baseContext);
 

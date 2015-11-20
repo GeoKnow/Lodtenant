@@ -6,9 +6,10 @@ import java.util.Map;
 
 import org.aksw.jena_sparql_api.core.SparqlService;
 import org.aksw.jena_sparql_api.mapper.jpa.EntityManagerJena;
+import org.aksw.jena_sparql_api.mapper.model.RdfClassFactory;
 import org.aksw.jena_sparql_api.update.FluentSparqlService;
 import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
-import org.aksw.lodtenant.manager.domain.WorkflowSpec;
+import org.aksw.lodtenant.repo.rdf.JobSpec;
 
 import com.google.common.base.Supplier;
 import com.hp.hpl.jena.graph.Node;
@@ -139,15 +140,17 @@ public class MainRdfAnnotation {
 
         Prologue prologue = new Prologue();
         prologue.setPrefix("o", "http://example.org/");
+        RdfClassFactory rdfClassFactory = RdfClassFactory.createDefault(prologue);
+
         SparqlService ss = FluentSparqlService.http("http://localhost:8890/sparql", "http://rdfmap.org/").create();
-        EntityManagerJena em = new EntityManagerJena(prologue, null, ss);
+        EntityManagerJena em = new EntityManagerJena(rdfClassFactory, null, ss);
 
 
         System.out.println(DatasetDescriptionUtils.toString(ss.getDatasetDescription()));
 
         //Workflow wa = em.find(Workflow.class, "http://example.org/99914b932bd37a50b983c5e7c90ae93b-franz");
 
-        WorkflowSpec wa = EntityManagerUtils.findByAttribute(em, WorkflowSpec.class, "alias", "my-workflow");
+        JobSpec wa = EntityManagerUtils.findByAttribute(em, JobSpec.class, "alias", "my-workflow");
 
 
 
