@@ -17,12 +17,16 @@ public class JobInstanceSpec {
     @Iri("lodflow:params")
     protected String params;
 
+    @Iri("lodflow:jobInstanceId")
+    protected Long jobInstanceId;
+
     public JobInstanceSpec() {
     }
 
-    public JobInstanceSpec(String jobId, String params) {
+    public JobInstanceSpec(String jobId, String params, Long jobInstanceId) {
         this.jobId = jobId;
         this.params = params;
+        this.jobInstanceId = jobInstanceId;
     }
 
     public String getJobId() {
@@ -41,39 +45,13 @@ public class JobInstanceSpec {
         this.params = params;
     }
 
-    @Override
-    public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((jobId == null) ? 0 : jobId.hashCode());
-        result = prime * result + ((params == null) ? 0 : params.hashCode());
-        return result;
+    public Long getJobInstanceId() {
+        return jobInstanceId;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        JobInstanceSpec other = (JobInstanceSpec) obj;
-        if (jobId == null) {
-            if (other.jobId != null)
-                return false;
-        } else if (!jobId.equals(other.jobId))
-            return false;
-        if (params == null) {
-            if (other.params != null)
-                return false;
-        } else if (!params.equals(other.params))
-            return false;
-        return true;
+    public void setJobInstanceId(Long jobInstanceId) {
+        this.jobInstanceId = jobInstanceId;
     }
 
-    @Override
-    public String toString() {
-        return "JobInstanceSpec [jobId=" + jobId + ", params=" + params + "]";
-    }
+
 }

@@ -1,8 +1,8 @@
 package org.aksw.lodtenant.config;
 
 import org.aksw.jena_sparql_api.core.SparqlService;
+import org.aksw.jena_sparql_api.mapper.impl.type.RdfTypeFactoryImpl;
 import org.aksw.jena_sparql_api.mapper.jpa.EntityManagerJena;
-import org.aksw.jena_sparql_api.mapper.model.RdfClassFactory;
 import org.aksw.lodtenant.core.impl.JobManagerImpl;
 import org.aksw.lodtenant.core.interfaces.JobManager;
 import org.springframework.batch.core.configuration.annotation.AbstractBatchConfiguration;
@@ -19,7 +19,7 @@ public class ConfigJob {
         prologue.setPrefix("o", "http://example.org/");
         prologue.setPrefix("lodflow", "http://lodflow.aksw.org/ontology/");
 
-        RdfClassFactory rdfClassFactory = RdfClassFactory
+        RdfTypeFactoryImpl rdfClassFactory = RdfTypeFactoryImpl
                 .createDefault(prologue);
 
         // SparqlService ss =
