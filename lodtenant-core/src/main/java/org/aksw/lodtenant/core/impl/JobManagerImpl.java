@@ -28,7 +28,7 @@ public class JobManagerImpl
         JobSpec jobSpec = new JobSpec(jobSpecStr, "http://example.org/agent/defaultAgent", null);
 
         entityManager.persist(jobSpec);
-        Node subject = entityManager.getRdfClassFactory().create(JobSpec.class).getSubject(jobSpec);
+        Node subject = entityManager.getRdfClassFactory().forJavaType(JobSpec.class).getRootNode(jobSpec);
 
         System.out.println(subject);
 
@@ -55,7 +55,7 @@ public class JobManagerImpl
 
         entityManager.merge(jis);
 
-        Node subject = entityManager.getRdfClassFactory().create(JobInstanceSpec.class).getSubject(jis);
+        Node subject = entityManager.getRdfClassFactory().forJavaType(JobInstanceSpec.class).getRootNode(jis);
 
         String result = subject.getURI();
         return result;
@@ -73,7 +73,7 @@ public class JobManagerImpl
 
         entityManager.merge(jes);
 
-        Node subject = entityManager.getRdfClassFactory().create(JobExecutionSpec.class).getSubject(jes);
+        Node subject = entityManager.getRdfClassFactory().forJavaType(JobExecutionSpec.class).getRootNode(jes);
 
         String result = subject.getURI();
         return result;

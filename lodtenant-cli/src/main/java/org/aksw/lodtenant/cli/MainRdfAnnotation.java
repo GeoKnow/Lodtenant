@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.aksw.jena_sparql_api.core.SparqlService;
+import org.aksw.jena_sparql_api.mapper.impl.type.RdfTypeFactoryImpl;
 import org.aksw.jena_sparql_api.mapper.jpa.EntityManagerJena;
-import org.aksw.jena_sparql_api.mapper.model.RdfClassFactory;
 import org.aksw.jena_sparql_api.update.FluentSparqlService;
 import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
 import org.aksw.lodtenant.repo.rdf.JobSpec;
@@ -140,7 +140,7 @@ public class MainRdfAnnotation {
 
         Prologue prologue = new Prologue();
         prologue.setPrefix("o", "http://example.org/");
-        RdfClassFactory rdfClassFactory = RdfClassFactory.createDefault(prologue);
+        RdfTypeFactoryImpl rdfClassFactory = RdfTypeFactoryImpl.createDefault(prologue);
 
         SparqlService ss = FluentSparqlService.http("http://localhost:8890/sparql", "http://rdfmap.org/").create();
         EntityManagerJena em = new EntityManagerJena(rdfClassFactory, null, ss);
