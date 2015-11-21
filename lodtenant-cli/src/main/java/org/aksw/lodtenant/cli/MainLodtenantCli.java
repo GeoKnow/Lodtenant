@@ -213,6 +213,9 @@ public class MainLodtenantCli {
         System.out.println("jobExecutionId: " + jobExecutionId);
 
 
+        Job jobX = jobManager.getJob(jobId);
+        System.out.println(jobX);
+
 
 
 //        SparqlServiceFactory defaultSparqlServiceFactory = workflowContext.getBean(SparqlServiceFactory.class);

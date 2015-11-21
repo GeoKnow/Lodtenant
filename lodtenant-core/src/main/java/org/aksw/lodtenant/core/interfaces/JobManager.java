@@ -1,5 +1,9 @@
 package org.aksw.lodtenant.core.interfaces;
 
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobInstance;
+
 public interface JobManager {
 
     /**
@@ -21,4 +25,9 @@ public interface JobManager {
 
 
     String createJobExecution(String jobInstanceId);
+
+
+    Job getJob(String jobId);
+    JobInstance getJobInstance(String instanceId);
+    JobExecution getJobExecution(String executionId);
 }
