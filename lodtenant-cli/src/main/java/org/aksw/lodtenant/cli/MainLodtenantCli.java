@@ -97,42 +97,48 @@ public class MainLodtenantCli {
         OptionParser parser = new OptionParser();
 
         OptionSpec<File> configFileOs = parser
-                .acceptsAll(Arrays.asList("c", "config"))
+                .acceptsAll(Arrays.asList("c", "config"), "Configuration of the context in which workflows run")
                 .withRequiredArg()
+                //.describedAs()
                 .ofType(File.class)
-                .describedAs("Configuration of the context in which workflows run")
-                .required();//.defaultsTo(null);
+                .required()
+                ;//.defaultsTo(null);
 
         OptionSpec<File> jobFileOs = parser
-                .acceptsAll(Arrays.asList("j", "job"))
+                .acceptsAll(Arrays.asList("j", "job"), "File containing the job definition")
                 .withRequiredArg()
                 .ofType(File.class)
-                .describedAs("File containing the job definition");
+                ;
+                //.describedAs();
 
         OptionSpec<String> jobIdOs = parser
                 .acceptsAll(Arrays.asList("i", "id"))
                 .withRequiredArg()
                 .ofType(String.class)
-                .describedAs("Job identifier");
+                .describedAs("jobId")
+                ;
 
         OptionSpec<File> jobParamsOs = parser
-                .acceptsAll(Arrays.asList("p", "params"))
+                .acceptsAll(Arrays.asList("p", "params"), "Job parameter file")
                 .withRequiredArg()
                 .ofType(File.class)
-                .describedAs("Job parameter file");
+                ;
+                //.describedAs();
 
         OptionSpec<File> registerOs = parser
-                .acceptsAll(Arrays.asList("register"))
-                    .withRequiredArg()
-                    .ofType(File.class)
-                .describedAs("Registers a new job template");
+                .acceptsAll(Arrays.asList("register"), "Registers a new job template")
+                .withRequiredArg()
+                .ofType(File.class)
+                ;
+                //.describedAs();
 
         OptionSpec<File> prepareOs = parser
-                .acceptsAll(Arrays.asList("prepare"))
+                .acceptsAll(Arrays.asList("prepare"), "Create a job instance")
                 .withRequiredArg()
-                    .describedAs("job alias")
-                    .ofType(File.class)
-                .describedAs("Create a job instance");
+                .describedAs("job alias")
+                .ofType(File.class)
+//                .describedAs("Create a job instance")
+                ;
 
 
 
