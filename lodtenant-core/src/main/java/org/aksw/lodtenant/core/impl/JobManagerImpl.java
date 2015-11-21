@@ -5,6 +5,9 @@ import org.aksw.lodtenant.core.interfaces.JobManager;
 import org.aksw.lodtenant.repo.rdf.JobExecutionSpec;
 import org.aksw.lodtenant.repo.rdf.JobInstanceSpec;
 import org.aksw.lodtenant.repo.rdf.JobSpec;
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.configuration.annotation.AbstractBatchConfiguration;
 
 import com.hp.hpl.jena.graph.Node;
@@ -25,7 +28,8 @@ public class JobManagerImpl
 
     @Override
     public String registerJob(String jobSpecStr) {
-        JobSpec jobSpec = new JobSpec(jobSpecStr, "http://example.org/agent/defaultAgent", null);
+        String jobName = "foo";
+        JobSpec jobSpec = new JobSpec(jobSpecStr, "http://example.org/agent/defaultAgent", jobName);
 
         entityManager.persist(jobSpec);
         Node subject = entityManager.getRdfClassFactory().forJavaType(JobSpec.class).getRootNode(jobSpec);
@@ -51,7 +55,7 @@ public class JobManagerImpl
      */
     public String createJobInstance(String jobId, String jobParams) {
 
-        JobInstanceSpec jis = new JobInstanceSpec(jobId, jobParams);
+        JobInstanceSpec jis = new JobInstanceSpec(jobId, jobParams, -1l);
 
         entityManager.merge(jis);
 
@@ -78,6 +82,51 @@ public class JobManagerImpl
         String result = subject.getURI();
         return result;
 
+    }
+
+    @Override
+    public Job getJob(String iri) {
+        JobSpec spec = entityManager.find(JobSpec.class, iri);
+        String jobName = spec.getName();
+
+        Job result;
+        try {
+            result = batchConfig.jobRegistry().getJob(jobName);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return result;
+    }
+
+    @Override
+    public JobInstance getJobInstance(String iri) {
+        JobInstanceSpec spec = entityManager.find(JobInstanceSpec.class, iri);
+        Long batchId = spec.getJobInstanceId();
+
+        JobInstance result;
+        try {
+            result = batchConfig.jobExplorer().getJobInstance(batchId);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return result;
+    }
+
+    @Override
+    public JobExecution getJobExecution(String iri) {
+        JobExecutionSpec spec = entityManager.find(JobExecutionSpec.class, iri);
+        Long batchId = spec.getExecutionId();
+
+        JobExecution result;
+        try {
+            result = batchConfig.jobExplorer().getJobExecution(batchId);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return result;
     }
 
 //    public void start(String jobExecutionId) {

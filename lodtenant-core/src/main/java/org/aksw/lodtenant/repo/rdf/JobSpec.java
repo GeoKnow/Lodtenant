@@ -11,7 +11,8 @@ import org.aksw.jena_sparql_api.mapper.annotation.RdfType;
 // Note: this annotation creates a default id, it is not mandatory for existing instances to follow this pattern
 
 //@DefaultIri("o:job-#{#md5(content)}-#{#localName(owner)}")
-@DefaultIri("o:job-#{#md5(content)}")
+//@DefaultIri("o:job-#{#md5(content)}-#{#encodeForUri(name)}")
+@DefaultIri("o:job-#{#md5(content)}-#{name}")
 @RdfType("lodflow:Job") // TODO Possibly add flag to control removal behavior: remove-on-delete, remove-on-empty
 public class JobSpec {
     //protected Set<String> aliases;
@@ -21,7 +22,7 @@ public class JobSpec {
     protected String owner;
 
     @Iri("rdfs:label")
-    protected String alias;
+    protected String name;
     //protected List<String> aliases;
 
     public JobSpec() {
@@ -32,11 +33,11 @@ public class JobSpec {
     // @Embedded("sub-uri")
     // @MappedBy("attributeOfForeignClass")
     // List<User> contributors;
-    public JobSpec(String content, String owner, String alias) {
+    public JobSpec(String content, String owner, String name) {
         super();
         this.content = content;
         this.owner = owner;
-        this.alias = alias;
+        this.name = name;
     }
 
     public String getContent() {
@@ -55,12 +56,12 @@ public class JobSpec {
         this.owner = owner;
     }
 
-    public String getAlias() {
-        return alias;
+    public String getName() {
+        return name;
     }
 
-    public void setAlias(String alias) {
-        this.alias = alias;
+    public void setName(String name) {
+        this.name = name;
     }
 
 }

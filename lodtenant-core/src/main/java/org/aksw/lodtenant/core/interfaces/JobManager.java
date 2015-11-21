@@ -1,14 +1,18 @@
 package org.aksw.lodtenant.core.interfaces;
 
+import org.springframework.batch.core.Job;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobInstance;
+
 public interface JobManager {
 
     /**
      * Returns the id (should be a URI) under which the job was registered.
      *
-     * @param jobSpec
+     * @param jobId
      * @return
      */
-    String registerJob(String jobSpec);
+    String registerJob(String jobId);
 
     /**
      * Returns the id of a job instance
@@ -21,4 +25,8 @@ public interface JobManager {
 
 
     String createJobExecution(String jobInstanceId);
+
+    Job getJob(String jobId);
+    JobInstance getJobInstance(String jobInstanceId);
+    JobExecution getJobExecution(String jobExecutionId);
 }
