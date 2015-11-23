@@ -1,6 +1,6 @@
 package org.aksw.lodtenant.web;
 
-import org.aksw.jena_sparql_api.mapper.jpa.EntityManagerJena;
+import org.aksw.jena_sparql_api.mapper.jpa.core.EntityManagerJenaOld;
 
 import com.google.gson.JsonElement;
 
@@ -10,7 +10,7 @@ import com.google.gson.JsonElement;
 //@Path("/api")
 public class ServletLodtenant {
 
-    protected EntityManagerJena entityManager;
+    protected EntityManagerJenaOld entityManager;
 
 
     public void register(JsonElement workflowJson) {

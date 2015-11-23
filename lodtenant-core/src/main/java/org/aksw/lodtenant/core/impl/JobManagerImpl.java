@@ -1,6 +1,6 @@
 package org.aksw.lodtenant.core.impl;
 
-import org.aksw.jena_sparql_api.mapper.jpa.EntityManagerJena;
+import org.aksw.jena_sparql_api.mapper.jpa.core.EntityManagerJena;
 import org.aksw.lodtenant.core.interfaces.JobManager;
 import org.aksw.lodtenant.repo.rdf.JobExecutionSpec;
 import org.aksw.lodtenant.repo.rdf.JobInstanceSpec;
@@ -32,7 +32,7 @@ public class JobManagerImpl
         JobSpec jobSpec = new JobSpec(jobSpecStr, "http://example.org/agent/defaultAgent", jobName);
 
         entityManager.persist(jobSpec);
-        Node subject = entityManager.getRdfClassFactory().forJavaType(JobSpec.class).getRootNode(jobSpec);
+        Node subject = entityManager.getRdfTypeFactory().forJavaType(JobSpec.class).getRootNode(jobSpec);
 
         System.out.println(subject);
 
@@ -59,7 +59,7 @@ public class JobManagerImpl
 
         entityManager.merge(jis);
 
-        Node subject = entityManager.getRdfClassFactory().forJavaType(JobInstanceSpec.class).getRootNode(jis);
+        Node subject = entityManager.getRdfTypeFactory().forJavaType(JobInstanceSpec.class).getRootNode(jis);
 
         String result = subject.getURI();
         return result;
@@ -77,7 +77,7 @@ public class JobManagerImpl
 
         entityManager.merge(jes);
 
-        Node subject = entityManager.getRdfClassFactory().forJavaType(JobExecutionSpec.class).getRootNode(jes);
+        Node subject = entityManager.getRdfTypeFactory().forJavaType(JobExecutionSpec.class).getRootNode(jes);
 
         String result = subject.getURI();
         return result;
