@@ -80,24 +80,9 @@ public class MainLodtenantCli {
         ParameterizedType stringListType = (ParameterizedType) stringListField.getGenericType();
         Class<?> stringListClass = (Class<?>) stringListType.getActualTypeArguments()[0];    }
 
-    /**
-     * Life cycle management functions for job executions
-     *
-     */
-    public static final String START = "start";
-    public static final String ABORT = "abort";
-    public static final String STOP = "stop";
-    public static final String RESTART = "restart";
 
 
     public static void main(String[] args) throws Exception {
-
-//        JobLauncher x;
-//        JobExecution y = x.run(job, jobParameters);
-//        y.
-//        JobRepository x;
-//        x.ge
-
         OptionParser parser = new OptionParser();
 
         OptionSpec<File> configFileOs = parser
@@ -136,11 +121,11 @@ public class MainLodtenantCli {
                 .describedAs("executionId")
                 ;
 
-        OptionSpec<File> jobParamsOs = parser
-                .acceptsAll(Arrays.asList("p", "params"), "Job parameter file")
-                .withRequiredArg()
-                .ofType(File.class)
-                ;
+//        OptionSpec<String> jobParamsOs = parser
+//                .acceptsAll(Arrays.asList("p", "params"), "Job parameter file")
+//                .withRequiredArg()
+//                .ofType(String.class)
+//                ;
                 //.describedAs();
 
         OptionSpec<File> registerOs = parser
@@ -150,25 +135,23 @@ public class MainLodtenantCli {
                 ;
                 //.describedAs();
 
-        OptionSpec<File> prepareOs = parser
+        OptionSpec<String> prepareOs = parser
                 .acceptsAll(Arrays.asList("prepare"), "Create a job instance")
-                .withRequiredArg()
-                .describedAs("job alias")
-                .ofType(File.class)
+                .withOptionalArg()
+                .ofType(String.class)
+                .defaultsTo("")
+                .describedAs("params file or string")
 //                .describedAs("Create a job instance")
                 ;
 
-        OptionSpec<File> launchOs = parser
+        OptionSpec<String> launchOs = parser
                 .acceptsAll(Arrays.asList("launch"), "Create a new execution")
                 .withRequiredArg()
                 .describedAs("jobInstanceId")
-                .ofType(File.class)
+                .ofType(String.class)
 //                .describedAs("Create a job instance")
                 ;
 
-
-        parser.accepts(PREPARE).withRequiredArg();
-        parser.accepts(START).withRequiredArg();
 
         parser.printHelpOn(System.err);
 
@@ -262,8 +245,14 @@ public class MainLodtenantCli {
 
 
         if(options.has(prepareOs)) {
-            File file = prepareOs.value(options);
-            String paramsStr = Files.toString(file, Charsets.UTF_8);//StreamUtils.toString(new FileInputStream)
+            String value = prepareOs.value(options);
+
+            File paramsFile = new File(value);
+            String paramsStr = paramsFile.exists()
+                ? Files.toString(paramsFile, Charsets.UTF_8)
+                : value
+                ;
+
 
             instanceId = jobManager.createJobInstance(jobId, paramsStr);
         }
