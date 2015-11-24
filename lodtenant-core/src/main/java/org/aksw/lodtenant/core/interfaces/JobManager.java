@@ -12,7 +12,8 @@ public interface JobManager {
      * @param jobId
      * @return
      */
-    String registerJob(String jobId);
+    //String registerJob(String jobId, String jobSpecStr);
+    String registerJob(String jobSpecStr);
 
     /**
      * Returns the id of a job instance

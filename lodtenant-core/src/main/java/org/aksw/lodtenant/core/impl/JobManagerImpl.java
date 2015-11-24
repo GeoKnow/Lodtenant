@@ -1,5 +1,14 @@
 package org.aksw.lodtenant.core.impl;
 
+import java.io.Reader;
+import java.io.StringReader;
+
+import org.aksw.gson.utils.JsonTransformerRewrite;
+import org.aksw.gson.utils.JsonWalker;
+import org.aksw.jena_sparql_api.batch.cli.main.JobParametersJsonUtils;
+import org.aksw.jena_sparql_api.batch.cli.main.JsonVisitorRewriteJobParameters;
+import org.aksw.jena_sparql_api.batch.cli.main.JsonVisitorRewriteKeys;
+import org.aksw.jena_sparql_api.batch.cli.main.MainBatchWorkflow;
 import org.aksw.jena_sparql_api.mapper.jpa.core.EntityManagerJena;
 import org.aksw.lodtenant.core.interfaces.JobManager;
 import org.aksw.lodtenant.repo.rdf.JobExecutionSpec;
@@ -8,27 +17,65 @@ import org.aksw.lodtenant.repo.rdf.JobSpec;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
+import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.configuration.annotation.AbstractBatchConfiguration;
+import org.springframework.context.ApplicationContext;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.stream.JsonReader;
 import com.hp.hpl.jena.graph.Node;
 
 public class JobManagerImpl
     implements JobManager
 {
+    protected ApplicationContext baseContext;
     protected AbstractBatchConfiguration batchConfig;
-
     protected EntityManagerJena entityManager;
-    //protected ApplicationContext parentContext;
+
+    protected Gson gson;
 
 
-    public JobManagerImpl(AbstractBatchConfiguration batchConfig, EntityManagerJena entityManager) {
+    public JobManagerImpl(ApplicationContext baseContext, AbstractBatchConfiguration batchConfig, EntityManagerJena entityManager, Gson gson) {
+        this.baseContext = baseContext;
         this.batchConfig = batchConfig;
         this.entityManager = entityManager;
+        this.gson = gson;
     }
+
+    public JsonElement parseJson(String str) {
+        //Reader reader = new InputStreamReader(resource.getInputStream());
+        Reader reader = new StringReader(str);
+        JsonReader jsonReader = new JsonReader(reader);
+        jsonReader.setLenient(true);
+
+        JsonElement result = gson.fromJson(jsonReader, JsonElement.class);
+        return result;
+    }
+
+    public Job buildJob(String jobSpecStr) {
+        JsonElement jobSpecJson = parseJson(jobSpecStr);
+
+        // Finally, init the job
+        ApplicationContext batchContext;
+        try {
+            batchContext = MainBatchWorkflow.initContext(baseContext, jobSpecJson);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        Job result = batchContext.getBean(Job.class);
+
+        return result;
+    }
+
 
     @Override
     public String registerJob(String jobSpecStr) {
-        String jobName = "foo";
+        Job job = buildJob(jobSpecStr);
+
+        String jobName = job.getName();
         JobSpec jobSpec = new JobSpec(jobSpecStr, "http://example.org/agent/defaultAgent", jobName);
 
         entityManager.persist(jobSpec);
@@ -38,12 +85,6 @@ public class JobManagerImpl
 
         String result = subject.getURI();
         return result;
-//        RdfClass rdfClass = entityManager.getRdfClassFactory().create(JobSpec.class);
-//        DatasetGraph dg = rdfClass.createDatasetGraph(jobSpec, Quad.defaultGraphIRI);
-//        Graph graph = dg.getDefaultGraph();
-//
-//
-//        UpdateExecutionUtils.executeInsert(uef, graph)
     }
 
     /**
@@ -53,12 +94,38 @@ public class JobManagerImpl
      * @param jobParams
      * @return
      */
-    public String createJobInstance(String jobId, String jobParams) {
+    public String createJobInstance(String jobId, String jobParamsStr) {
 
-        JobInstanceSpec jis = new JobInstanceSpec(jobId, jobParams, -1l);
 
+        JobSpec jobSpec = entityManager.find(JobSpec.class, jobId);
+        if(jobSpec == null) {
+            throw new RuntimeException("No job found for " + jobId);
+        }
+
+        String jobName = jobSpec.getName();
+
+        JsonElement jobParamsJson = parseJson(jobParamsStr);
+        JsonVisitorRewriteJobParameters subVisitor = new JsonVisitorRewriteJobParameters();
+        JsonVisitorRewriteKeys visitor = JsonVisitorRewriteKeys.create(JsonTransformerRewrite.create(subVisitor, false));
+
+        JsonElement effectiveJobParamsJson = JsonWalker.visit(jobParamsJson, visitor);
+        String nomalizedJobParamsStr = gson.toJson(effectiveJobParamsJson);
+        //System.out.println("Job params: " + );
+        JobParameters jobParams = JobParametersJsonUtils.toJobParameters(effectiveJobParamsJson, null);
+
+
+        JobInstance jobInstance;
+        try {
+            jobInstance = batchConfig.jobRepository().createJobInstance(jobName, jobParams);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        Long instanceId = jobInstance.getId();
+
+
+
+        JobInstanceSpec jis = new JobInstanceSpec(jobId, nomalizedJobParamsStr, instanceId);
         entityManager.merge(jis);
-
         Node subject = entityManager.getRdfTypeFactory().forJavaType(JobInstanceSpec.class).getRootNode(jis);
 
         String result = subject.getURI();

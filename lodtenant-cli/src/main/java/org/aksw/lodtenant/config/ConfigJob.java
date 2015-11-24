@@ -10,12 +10,14 @@ import org.aksw.lodtenant.core.interfaces.JobManager;
 import org.springframework.batch.core.configuration.annotation.AbstractBatchConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
+import com.google.gson.Gson;
 import com.hp.hpl.jena.sparql.core.Prologue;
 
 public class ConfigJob {
-	@Bean RdfMapperEngine mapperEngine(@Qualifier("jobRepo") SparqlService sparqlService) {
+    @Bean RdfMapperEngine mapperEngine(@Qualifier("jobRepo") SparqlService sparqlService) {
         Prologue prologue = new Prologue();
         prologue.setPrefix("o", "http://example.org/");
         prologue.setPrefix("lodflow", "http://lodflow.aksw.org/ontology/");
@@ -25,9 +27,10 @@ public class ConfigJob {
 
         RdfMapperEngine result = new RdfMapperEngineImpl(sparqlService, rdfTypeFactory);
         return result;
-	}
+    }
 
     @Bean
+    @Autowired
     public EntityManagerJena entityManager(RdfMapperEngine engine) {
 
         // SparqlService ss =
@@ -37,13 +40,14 @@ public class ConfigJob {
 
         return result;
     }
-
-    @Bean
-    @Autowired
-    public JobManager jobManager(AbstractBatchConfiguration batchConfig,
-            EntityManagerJena entityManager) {
-        JobManager result = new JobManagerImpl(batchConfig, entityManager);
-        return result;
-    }
+//
+//
+//    @Bean
+//    @Autowired
+//    public JobManager jobManager(ApplicationContext baseContext, AbstractBatchConfiguration batchConfig,
+//            EntityManagerJena entityManager, Gson gson) {
+//        JobManager result = new JobManagerImpl(baseContext, batchConfig, entityManager, gson);
+//        return result;
+//    }
 
 }
