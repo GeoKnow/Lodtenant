@@ -14,18 +14,28 @@ import org.aksw.lodtenant.core.interfaces.JobManager;
 import org.aksw.lodtenant.repo.rdf.JobExecutionSpec;
 import org.aksw.lodtenant.repo.rdf.JobInstanceSpec;
 import org.aksw.lodtenant.repo.rdf.JobSpec;
+import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.configuration.DuplicateJobException;
+import org.springframework.batch.core.configuration.JobFactory;
 import org.springframework.batch.core.configuration.annotation.AbstractBatchConfiguration;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.context.ApplicationContext;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonReader;
 import com.hp.hpl.jena.graph.Node;
+
+//class JobFactoryLodtenant
+//    implements JobFactory
+//{
+//
+//}
 
 public class JobManagerImpl
     implements JobManager
@@ -73,7 +83,7 @@ public class JobManagerImpl
 
     @Override
     public String registerJob(String jobSpecStr) {
-        Job job = buildJob(jobSpecStr);
+        final Job job = buildJob(jobSpecStr);
 
         String jobName = job.getName();
         JobSpec jobSpec = new JobSpec(jobSpecStr, "http://example.org/agent/defaultAgent", jobName);
@@ -81,11 +91,46 @@ public class JobManagerImpl
         entityManager.persist(jobSpec);
         Node subject = entityManager.getRdfTypeFactory().forJavaType(JobSpec.class).getRootNode(jobSpec);
 
+        try {
+            batchConfig.jobRegistry().register(new JobFactory() {
+                @Override
+                public String getJobName() {
+                    return job.getName();
+                }
+
+                @Override
+                public Job createJob() {
+                    return job;
+                }
+            });
+        }  catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         System.out.println(subject);
 
         String result = subject.getURI();
         return result;
     }
+
+    public JsonElement parseJobParams(String jobParamsStr) {
+        JsonElement jobParamsJson = parseJson(jobParamsStr);
+        JsonVisitorRewriteJobParameters subVisitor = new JsonVisitorRewriteJobParameters();
+        JsonVisitorRewriteKeys visitor = JsonVisitorRewriteKeys.create(JsonTransformerRewrite.create(subVisitor, false));
+
+        JsonElement result = JsonWalker.visit(jobParamsJson, visitor);
+
+        return result;
+    }
+
+//    public JobParameters parseJobParams(String jobParamsStr) {
+//        //String nomalizedJobParamsStr = gson.toJson(effectiveJobParamsJson);
+//        //System.out.println("Job params: " + );
+//        JobParameters result = JobParametersJsonUtils.toJobParameters(effectiveJobParamsJson, null);
+//
+//
+//        return result;
+//    }
 
     /**
      * Returns a JobInstance
@@ -104,14 +149,9 @@ public class JobManagerImpl
 
         String jobName = jobSpec.getName();
 
-        JsonElement jobParamsJson = parseJson(jobParamsStr);
-        JsonVisitorRewriteJobParameters subVisitor = new JsonVisitorRewriteJobParameters();
-        JsonVisitorRewriteKeys visitor = JsonVisitorRewriteKeys.create(JsonTransformerRewrite.create(subVisitor, false));
-
-        JsonElement effectiveJobParamsJson = JsonWalker.visit(jobParamsJson, visitor);
-        String nomalizedJobParamsStr = gson.toJson(effectiveJobParamsJson);
-        //System.out.println("Job params: " + );
-        JobParameters jobParams = JobParametersJsonUtils.toJobParameters(effectiveJobParamsJson, null);
+        JsonElement jobParamsJson = parseJobParams(jobParamsStr);
+        String nomalizedJobParamsStr = gson.toJson(jobParamsJson);
+        JobParameters jobParams = JobParametersJsonUtils.toJobParameters(jobParamsJson, null);
 
 
         JobInstance jobInstance;
@@ -121,7 +161,6 @@ public class JobManagerImpl
             throw new RuntimeException(e);
         }
         Long instanceId = jobInstance.getId();
-
 
 
         JobInstanceSpec jis = new JobInstanceSpec(jobId, nomalizedJobParamsStr, instanceId);
@@ -138,8 +177,52 @@ public class JobManagerImpl
 //    }
 
     public String createJobExecution(String jobInstanceId) {
+        JobInstanceSpec spec = entityManager.find(JobInstanceSpec.class, jobInstanceId);
+
+
+        if(spec == null) {
+            throw new RuntimeException("No job instance with id " + jobInstanceId + " found");
+        }
+
+        String jobId = spec.getJobId();
+        String jobParamsStr = spec.getParams();
+
+        Job job = getJob(jobId);
+        String jobName = job.getName();
+        JsonElement jobParamsJson = parseJobParams(jobParamsStr);
+        JobParameters jobParams = JobParametersJsonUtils.toJobParameters(jobParamsJson, null);
+
+        JobExecution jobExecution;
+//        try {
+//            jobExecution = batchConfig.jobRepository().getLastJobExecution(job.getName(), jobParams);
+//        } catch (Exception e1) {
+//            throw new RuntimeException(e1);
+//        }//.get .getLastJobExecution(job.getName(), jobParams);
+
+        // If there was a prior job, return its execution context
+//        BatchStatus status = jobExecution == null ? null : jobExecution.getStatus();
+//        if(status != null) {
+//            if(status.isRunning() || status.equals(BatchStatus.COMPLETED)) {
+//                return result;
+//            }
+//        }
+
+        //spec.getJobInstanceId();
+
+        try {
+            jobExecution = batchConfig.jobLauncher().run(job, jobParams);
+            //JobLauncher jobLauncher = batchConfig.jobLauncher();
+//            JobRepository jobRepository = batchConfig.jobRepository();
+//            JobInstance ji = new JobInstance(spec.getJobInstanceId(), jobName);
+//            jobExecution = jobRepository.createJobExecution(ji, jobParams, null);
+            //jobExecution = jobRepository.createJobExecution(jobName, jobParams);
+            //jobExecution = jobLauncher.run(job, jobParams);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         // Get the next jobExecutionId
-        Long jobExecutionId = null;
+        Long jobExecutionId = jobExecution.getId();
         JobExecutionSpec jes = new JobExecutionSpec(jobInstanceId, jobExecutionId);
 
         entityManager.merge(jes);

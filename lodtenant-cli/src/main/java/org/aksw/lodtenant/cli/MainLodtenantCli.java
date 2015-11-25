@@ -146,7 +146,7 @@ public class MainLodtenantCli {
 
         OptionSpec<String> launchOs = parser
                 .acceptsAll(Arrays.asList("launch"), "Create a new execution")
-                .withRequiredArg()
+                .withOptionalArg()
                 .describedAs("jobInstanceId")
                 .ofType(String.class)
 //                .describedAs("Create a job instance")
@@ -201,6 +201,9 @@ public class MainLodtenantCli {
         }
 
         configContext.refresh();
+
+
+        SparqlBatchUtils.cleanUp(configContext);
 
 //        System.out.println("CONFIG CONTEXT: " + Arrays.asList(configContext.getBeanDefinitionNames()));
 //        DefaultListableBeanFactory bf = (DefaultListableBeanFactory)configContext.getBeanFactory();
