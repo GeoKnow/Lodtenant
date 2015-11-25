@@ -17,6 +17,7 @@ import org.aksw.gson.utils.JsonWalker;
 import org.aksw.jena_sparql_api.batch.BatchWorkflowManager;
 import org.aksw.jena_sparql_api.batch.SparqlBatchUtils;
 import org.aksw.jena_sparql_api.batch.cli.main.MainBatchWorkflow;
+import org.aksw.jena_sparql_api.batch.config.ConfigBatchJobDynamic;
 import org.aksw.jena_sparql_api.batch.config.ConfigSparqlServicesCore;
 import org.aksw.jena_sparql_api.batch.json.domain.JsonVisitorRewriteBeans;
 import org.aksw.jena_sparql_api.beans.json.JsonProcessorContext;
@@ -200,8 +201,8 @@ public class MainLodtenantCli {
             contextProcessor.process(json);
         }
 
+        configContext.register(ConfigBatchJobDynamic.class);
         configContext.refresh();
-
 
         SparqlBatchUtils.cleanUp(configContext);
 

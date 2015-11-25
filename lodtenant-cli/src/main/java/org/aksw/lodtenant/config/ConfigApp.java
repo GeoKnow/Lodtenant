@@ -23,7 +23,7 @@ import com.hp.hpl.jena.sparql.core.Prologue;
 
 //@Import(ConfigDataSource.class)
 @Configuration
-@Import({ ConfigParsersCore.class, ConfigBatchJobDynamic.class })
+@Import({ ConfigParsersCore.class })
 public class ConfigApp {
 
     // @Value("#{ @lodtenant.tracker.sparqlService }")

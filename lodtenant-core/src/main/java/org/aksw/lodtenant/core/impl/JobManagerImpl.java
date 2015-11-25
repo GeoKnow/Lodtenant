@@ -2,6 +2,7 @@ package org.aksw.lodtenant.core.impl;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.List;
 
 import org.aksw.gson.utils.JsonTransformerRewrite;
 import org.aksw.gson.utils.JsonWalker;
@@ -19,11 +20,15 @@ import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersInvalidException;
 import org.springframework.batch.core.configuration.DuplicateJobException;
 import org.springframework.batch.core.configuration.JobFactory;
 import org.springframework.batch.core.configuration.annotation.AbstractBatchConfiguration;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.context.ApplicationContext;
 
 import com.google.gson.Gson;
@@ -153,10 +158,15 @@ public class JobManagerImpl
         String nomalizedJobParamsStr = gson.toJson(jobParamsJson);
         JobParameters jobParams = JobParametersJsonUtils.toJobParameters(jobParamsJson, null);
 
-
         JobInstance jobInstance;
         try {
-            jobInstance = batchConfig.jobRepository().createJobInstance(jobName, jobParams);
+            boolean isJobInstanceExists = batchConfig.jobRepository().isJobInstanceExists(jobName, jobParams);
+            if(isJobInstanceExists) {
+                List<JobInstance> jobInstances = batchConfig.jobExplorer().findJobInstancesByJobName(jobName, 0, 1);
+                jobInstance = jobInstances.get(0);
+            } else {
+                jobInstance = batchConfig.jobRepository().createJobInstance(jobName, jobParams);
+            }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -177,6 +187,19 @@ public class JobManagerImpl
 //    }
 
     public String createJobExecution(String jobInstanceId) {
+        String result;
+        try {
+            result = _createJobExecution(jobInstanceId);
+        } catch(Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return result;
+    }
+
+    public String _createJobExecution(String jobInstanceId)
+            throws Exception
+    {
         JobInstanceSpec spec = entityManager.find(JobInstanceSpec.class, jobInstanceId);
 
 
@@ -192,7 +215,9 @@ public class JobManagerImpl
         JsonElement jobParamsJson = parseJobParams(jobParamsStr);
         JobParameters jobParams = JobParametersJsonUtils.toJobParameters(jobParamsJson, null);
 
-        JobExecution jobExecution;
+        //JobExecution jobExecution;
+
+
 //        try {
 //            jobExecution = batchConfig.jobRepository().getLastJobExecution(job.getName(), jobParams);
 //        } catch (Exception e1) {
@@ -209,17 +234,24 @@ public class JobManagerImpl
 
         //spec.getJobInstanceId();
 
-        try {
-            jobExecution = batchConfig.jobLauncher().run(job, jobParams);
+        JobInstance ji = new JobInstance(spec.getJobInstanceId(), jobName);
+
+        JobExecution jobExecution = batchConfig.jobLauncher().run(job, jobParams);
+
+        //jobExecution = batchConfig.jobRepository().createJobExecution(ji, jobParams, null);
+            //jobExecution.stop();
+
+            //jobExecution = batchConfig.jobLauncher().run(job, jobParams);
+
+
+            //batchConfig.jobRepository().createJobExecution(jobInstance, jobParameters, jobConfigurationLocation)
+
             //JobLauncher jobLauncher = batchConfig.jobLauncher();
 //            JobRepository jobRepository = batchConfig.jobRepository();
 //            JobInstance ji = new JobInstance(spec.getJobInstanceId(), jobName);
 //            jobExecution = jobRepository.createJobExecution(ji, jobParams, null);
             //jobExecution = jobRepository.createJobExecution(jobName, jobParams);
             //jobExecution = jobLauncher.run(job, jobParams);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
 
         // Get the next jobExecutionId
         Long jobExecutionId = jobExecution.getId();
@@ -230,8 +262,12 @@ public class JobManagerImpl
         Node subject = entityManager.getRdfTypeFactory().forJavaType(JobExecutionSpec.class).getRootNode(jes);
 
         String result = subject.getURI();
-        return result;
 
+
+
+        //job.execute(jobExecution);
+
+        return result;
     }
 
     @Override
