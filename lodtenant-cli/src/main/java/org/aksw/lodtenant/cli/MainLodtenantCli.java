@@ -216,7 +216,9 @@ public class MainLodtenantCli {
         jobContext.setParent(configContext);
         jobContext.register(ConfigSparqlServicesCore.class);
         jobContext.register(ConfigJob.class);
+
         jobContext.refresh();
+        MainBatchWorkflow.initJenaExtensions(jobContext);
 
 
         JobManager jobManager = (JobManager)jobContext.getAutowireCapableBeanFactory().autowire(JobManagerImpl.class, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, true);
@@ -272,6 +274,8 @@ public class MainLodtenantCli {
         }
         System.out.println("jobExecutionId: " + executionId);
 
+        //Thread.sleep(30000);
+        System.out.println("Waited for 3 sec");
 
 //        Job jobX = jobManager.getJob(jobId);
 //        System.out.println(jobX);

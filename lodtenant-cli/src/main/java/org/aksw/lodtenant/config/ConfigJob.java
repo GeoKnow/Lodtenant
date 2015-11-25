@@ -1,10 +1,12 @@
 package org.aksw.lodtenant.config;
 
+import org.aksw.jena_sparql_api.batch.cli.main.MainBatchWorkflow;
 import org.aksw.jena_sparql_api.core.SparqlService;
 import org.aksw.jena_sparql_api.mapper.impl.engine.RdfMapperEngine;
 import org.aksw.jena_sparql_api.mapper.impl.engine.RdfMapperEngineImpl;
 import org.aksw.jena_sparql_api.mapper.impl.type.RdfTypeFactoryImpl;
 import org.aksw.jena_sparql_api.mapper.jpa.core.EntityManagerJena;
+import org.aksw.lodtenant.cli.MainLodtenantCli;
 import org.aksw.lodtenant.core.impl.JobManagerImpl;
 import org.aksw.lodtenant.core.interfaces.JobManager;
 import org.springframework.batch.core.configuration.annotation.AbstractBatchConfiguration;
@@ -15,12 +17,16 @@ import org.springframework.context.annotation.Bean;
 
 import com.google.gson.Gson;
 import com.hp.hpl.jena.sparql.core.Prologue;
+import com.hp.hpl.jena.vocabulary.OWL;
+import com.hp.hpl.jena.vocabulary.RDF;
+import com.hp.hpl.jena.vocabulary.RDFS;
+import com.hp.hpl.jena.vocabulary.XSD;
 
 public class ConfigJob {
     @Bean RdfMapperEngine mapperEngine(@Qualifier("jobRepo") SparqlService sparqlService) {
         Prologue prologue = new Prologue();
-        prologue.setPrefix("o", "http://example.org/");
-        prologue.setPrefix("lodflow", "http://lodflow.aksw.org/ontology/");
+
+        MainBatchWorkflow.addDefaultPrefixMapping(prologue.getPrefixMapping());
 
         RdfTypeFactoryImpl rdfTypeFactory = RdfTypeFactoryImpl
                 .createDefault(prologue);

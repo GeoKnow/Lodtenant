@@ -234,7 +234,13 @@ public class JobManagerImpl
 
         //spec.getJobInstanceId();
 
-        JobInstance ji = new JobInstance(spec.getJobInstanceId(), jobName);
+
+        JobExecution tmp = batchConfig.jobRepository().getLastJobExecution(jobName, jobParams);
+
+        if(tmp == null) {
+            JobInstance jobInstance = new JobInstance(spec.getJobInstanceId(), jobName);
+            tmp = batchConfig.jobRepository().createJobExecution(jobInstance, jobParams, null);
+        }
 
         JobExecution jobExecution = batchConfig.jobLauncher().run(job, jobParams);
 
