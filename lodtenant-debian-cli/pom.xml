@@ -9,7 +9,7 @@
     </parent>
 
     <artifactId>lodtenant-debian-cli</artifactId>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
 
     <properties>
         <deb.packageName>lodtenant-cli</deb.packageName>
@@ -19,6 +19,7 @@
 
     <build>
         <plugins>
+<!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
@@ -27,7 +28,7 @@
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                 </configuration>
             </plugin>
-
+-->
             <plugin>
                 <artifactId>jdeb</artifactId>
                 <groupId>org.vafer</groupId>
@@ -80,7 +81,7 @@
 
                                 <data>
                                     <type>file</type>
-                                    <src>${project.build.directory}/${project.build.finalName}.war</src>
+                                    <src>${project.build.directory}/${project.build.finalName}.${project.packaging}</src>
                                     <mapper>
                                         <type>perm</type>
                                         <prefix>/usr/share/lib/${deb.packageName}</prefix>
@@ -92,8 +93,8 @@
                                 <data>
                                     <type>link</type>
                                     <symlink>true</symlink>
-                                    <linkName>/usr/share/lib/${deb.packageName}/${deb.packageName}.war</linkName>
-                                    <linkTarget>/usr/share/lib/${deb.packageName}/${project.build.finalName}.war</linkTarget>
+                                    <linkName>/usr/share/lib/${deb.packageName}/${deb.packageName}.${project.packaging}</linkName>
+                                    <linkTarget>/usr/share/lib/${deb.packageName}/${project.build.finalName}.${project.packaging}</linkTarget>
                                 </data>
 
                             </dataSet>
@@ -107,13 +108,10 @@
 
 
     <dependencies>
-<!--
         <dependency>
-            <groupId>org.aksw.facete2</groupId>
-            <artifactId>facete2-webapp</artifactId>
-            <type>war</type>
+            <groupId>org.aksw.lodtenant</groupId>
+            <artifactId>lodtenant-cli</artifactId>
         </dependency>
--->
     </dependencies>
 </project>
 
