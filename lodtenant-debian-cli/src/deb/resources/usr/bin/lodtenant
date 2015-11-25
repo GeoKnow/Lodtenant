@@ -1,4 +1,9 @@
 #!/bin/sh
 
-java -cp "/usr/share/lib/lodtenant-cli/lodtenant-cli.jar" org.aksw.lodtenant.cli.MainLodtenantCli "$@"
+# Source the global lodtenant.conf file in order to get the defaultProfile
+. /etc/lodtenant/lodtenant.conf
+
+# TODO Allow searching for config e.g. in the user dir, such as ~/.config/lodtenant/
+
+java -cp "/usr/share/lib/lodtenant-cli/lodtenant-cli.jar" org.aksw.lodtenant.cli.MainLodtenantCli -c "$defaultProfile" "$@"
 
