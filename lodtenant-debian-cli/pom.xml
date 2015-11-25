@@ -91,29 +91,25 @@
 
                             <dataSet>
 
+
                                 <data>
                                     <type>directory</type>
-                                    <src>${basedir}/src/deb/resources/usr</src>
+                                    <src>${basedir}/src/deb/resources/etc</src>
                                     <mapper>
                                         <type>perm</type>
-                                        <prefix>/usr</prefix>
+                                        <prefix>/etc</prefix>
                                     </mapper>
                                 </data>
 
-<!--
                                 <data>
                                     <type>directory</type>
-                                    <src>${basedir}/src/deb/resources/opt/facete2</src>
+                                    <src>${basedir}/src/deb/resources/usr/bin</src>
                                     <mapper>
                                         <type>perm</type>
-                                        <prefix>/opt/facete2</prefix>
-                                        <user>tomcat7</user>
-                                        <group>tomcat7</group>
-                                        <dirmode>775</dirmode>
+                                        <prefix>/usr/bin</prefix>
+                                        <filemode>755</filemode>
                                     </mapper>
                                 </data>
--->
-
 
                                 <data>
                                     <type>file</type>
@@ -121,8 +117,6 @@
                                     <mapper>
                                         <type>perm</type>
                                         <prefix>/usr/share/lib/${deb.packageName}</prefix>
-                                        <!-- <user>loader</user> -->
-                                        <!-- <group>loader</group> -->
                                     </mapper>
                                 </data>
 
@@ -132,6 +126,7 @@
                                     <linkName>/usr/share/lib/${deb.packageName}/${deb.packageName}.${project.packaging}</linkName>
                                     <linkTarget>/usr/share/lib/${deb.packageName}/${project.build.finalName}.${project.packaging}</linkTarget>
                                 </data>
+
 
                             </dataSet>
 
