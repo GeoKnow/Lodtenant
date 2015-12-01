@@ -18,7 +18,7 @@ import org.aksw.jena_sparql_api.batch.SparqlBatchUtils;
 import org.aksw.jena_sparql_api.batch.cli.main.MainBatchWorkflow;
 import org.aksw.jena_sparql_api.batch.config.ConfigBatchJobDynamic;
 import org.aksw.jena_sparql_api.batch.config.ConfigSparqlServicesCore;
-import org.aksw.jena_sparql_api.batch.json.domain.JsonVisitorRewriteBeans;
+import org.aksw.jena_sparql_api.batch.json.rewriters.JsonVisitorRewriteBeans;
 import org.aksw.jena_sparql_api.beans.json.JsonProcessorContext;
 import org.aksw.lodtenant.config.ConfigApp;
 import org.aksw.lodtenant.config.ConfigJob;
