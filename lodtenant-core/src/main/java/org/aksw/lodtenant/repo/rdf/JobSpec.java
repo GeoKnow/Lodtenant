@@ -4,6 +4,9 @@ import org.aksw.jena_sparql_api.mapper.annotation.DefaultIri;
 import org.aksw.jena_sparql_api.mapper.annotation.Iri;
 import org.aksw.jena_sparql_api.mapper.annotation.RdfType;
 
+import com.hp.hpl.jena.vocabulary.OWL;
+import com.hp.hpl.jena.vocabulary.RDFS;
+
 //@Namespace("o: <http://foobar.org>")
 //@RdfGen"")
 // By default, classes are 'TypeIdentifiable', this means, that instances of a class

@@ -11,6 +11,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import javax.sql.DataSource;
+
 import org.aksw.commons.util.StreamUtils;
 import org.aksw.gson.utils.JsonWalker;
 import org.aksw.jena_sparql_api.batch.BatchWorkflowManager;
@@ -35,6 +37,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.core.env.JOptCommandLinePropertySource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -47,6 +50,7 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
 public class MainLodtenantCli {
+
 
     /**
      * Register a workflow
