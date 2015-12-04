@@ -13,6 +13,11 @@
     <packaging>jar</packaging>
 
     <dependencies>
+<!--         <dependency> -->
+<!--             <groupId>org.aksw.spring</groupId> -->
+<!--             <artifactId>spring-json-core</artifactId> -->
+<!--         </dependency> -->
+
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>

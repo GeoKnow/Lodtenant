@@ -27,6 +27,8 @@ import org.aksw.lodtenant.config.ConfigJob;
 import org.aksw.lodtenant.core.impl.JobManagerImpl;
 import org.aksw.lodtenant.core.interfaces.JobManager;
 import org.aksw.lodtenant.repo.rdf.JobSpec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.job.SimpleJob;
@@ -51,6 +53,7 @@ import joptsimple.OptionSpec;
 
 public class MainLodtenantCli {
 
+    private static final Logger logger = LoggerFactory.getLogger(MainLodtenantCli.class);
 
     /**
      * Register a workflow
@@ -157,8 +160,6 @@ public class MainLodtenantCli {
                 ;
 
 
-        parser.printHelpOn(System.err);
-
         OptionSet options = parser.parse(args);
 
 
@@ -197,7 +198,7 @@ public class MainLodtenantCli {
 
 
             String str = gson.toJson(json);
-            System.out.println(str);
+            logger.debug("Workflow specification document: " + str);
 
 
             JsonProcessorContext contextProcessor = new JsonProcessorContext(configContext);
@@ -219,6 +220,24 @@ public class MainLodtenantCli {
         jobContext.setParent(configContext);
         jobContext.register(ConfigSparqlServicesCore.class);
         jobContext.register(ConfigJob.class);
+
+
+        String paramsStr = null;
+        if(options.has(prepareOs)) {
+            String value = prepareOs.value(options);
+
+            File paramsFile = new File(value);
+            paramsStr = paramsFile.exists()
+                ? Files.toString(paramsFile, Charsets.UTF_8)
+                : value
+                ;
+
+            JobParameters jobParams = JobManagerImpl.parseJobP(gson, paramsStr);
+            jobContext.getBeanFactory().registerSingleton("jobParameters", jobParams.toProperties());
+        }
+
+
+
 
         jobContext.refresh();
         MainBatchWorkflow.initJenaExtensions(jobContext);
@@ -250,35 +269,36 @@ public class MainLodtenantCli {
             //JobManager jobManager = jobContext.getBean(JobManager.class);
             jobId = jobManager.registerJob(jobSpecStr);
         }
-        System.out.println("jobId: " + jobId);
+        logger.info("jobId: " + jobId);
 
 
         if(options.has(prepareOs)) {
-            String value = prepareOs.value(options);
-
-            File paramsFile = new File(value);
-            String paramsStr = paramsFile.exists()
-                ? Files.toString(paramsFile, Charsets.UTF_8)
-                : value
-                ;
-
-
             instanceId = jobManager.createJobInstance(jobId, paramsStr);
         }
-        System.out.println("jobInstanceId: " + instanceId);
+        logger.info("jobInstanceId: " + instanceId);
 
+
+        // Whether to print out help on the supported command line options
+        boolean isHelpNeeded = true;
 
 
         if(options.has(launchOs)) {
+            isHelpNeeded = false;
             //executionId = launchOs.value(options);
             //String paramsStr = Files.toString(file, Charsets.UTF_8);//StreamUtils.toString(new FileInputStream)
 
             executionId = jobManager.createJobExecution(instanceId);
         }
-        System.out.println("jobExecutionId: " + executionId);
+        logger.info("jobExecutionId: " + executionId);
+
+
+        if(isHelpNeeded) {
+            parser.printHelpOn(System.err);
+        }
+
 
         //Thread.sleep(30000);
-        System.out.println("Waited for 3 sec");
+//        System.out.println("Waited for 3 sec");
 
 //        Job jobX = jobManager.getJob(jobId);
 //        System.out.println(jobX);
@@ -348,8 +368,6 @@ public class MainLodtenantCli {
             // Object foo = batchContext.getBean("steps"
 
             // OptionSet options = parser.
-        } else {
-            parser.printHelpOn(System.err);
         }
     }
 }

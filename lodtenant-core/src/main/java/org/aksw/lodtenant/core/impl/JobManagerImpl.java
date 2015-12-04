@@ -15,21 +15,17 @@ import org.aksw.lodtenant.core.interfaces.JobManager;
 import org.aksw.lodtenant.repo.rdf.JobExecutionSpec;
 import org.aksw.lodtenant.repo.rdf.JobInstanceSpec;
 import org.aksw.lodtenant.repo.rdf.JobSpec;
-import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
-import org.springframework.batch.core.JobParametersInvalidException;
-import org.springframework.batch.core.configuration.DuplicateJobException;
 import org.springframework.batch.core.configuration.JobFactory;
 import org.springframework.batch.core.configuration.annotation.AbstractBatchConfiguration;
-import org.springframework.batch.core.launch.JobLauncher;
-import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
-import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
-import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.batch.core.scope.StepScope;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.util.Assert;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -59,7 +55,7 @@ public class JobManagerImpl
         this.gson = gson;
     }
 
-    public JsonElement parseJson(String str) {
+    public static JsonElement parseJson(Gson gson, String str) {
         //Reader reader = new InputStreamReader(resource.getInputStream());
         Reader reader = new StringReader(str);
         JsonReader jsonReader = new JsonReader(reader);
@@ -69,13 +65,55 @@ public class JobManagerImpl
         return result;
     }
 
+    public GenericApplicationContext preparejobContext(String jobSpecStr) {
+        JsonElement jobSpecJson = parseJson(gson, jobSpecStr);
+        GenericApplicationContext result;
+
+        try {
+            result = MainBatchWorkflow.initContext(baseContext, jobSpecJson);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return result;
+    }
+
+    public Job finalizeJobContext(GenericApplicationContext jobContext) {
+        jobContext.refresh();
+        Job result = jobContext.getBean(Job.class);
+
+        return result;
+    }
+
+
+    public String getJobName(GenericApplicationContext jobContext) {
+        String result;
+        BeanDefinition bd = MainBatchWorkflow.beanDefinitionOfType(jobContext, Job.class);
+        if(bd == null) {
+            throw new RuntimeException("No job detected");
+        }
+
+        Object tmp = bd.getPropertyValues().get("name");
+        if(tmp == null) {
+            throw new RuntimeException("No name specified for job");
+        }
+
+        Assert.isInstanceOf(String.class, tmp);
+        result = (String)tmp;
+
+
+        return result;
+    }
+
     public Job buildJob(String jobSpecStr) {
-        JsonElement jobSpecJson = parseJson(jobSpecStr);
+        JsonElement jobSpecJson = parseJson(gson, jobSpecStr);
 
         // Finally, init the job
-        ApplicationContext batchContext;
+        GenericApplicationContext batchContext;
         try {
             batchContext = MainBatchWorkflow.initContext(baseContext, jobSpecJson);
+
+            batchContext.refresh();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -88,9 +126,11 @@ public class JobManagerImpl
 
     @Override
     public String registerJob(String jobSpecStr) {
-        final Job job = buildJob(jobSpecStr);
+        final GenericApplicationContext jobContext = preparejobContext(jobSpecStr);
 
-        String jobName = job.getName();
+        final String jobName = getJobName(jobContext);
+
+        //String jobName = job.getName();
         JobSpec jobSpec = new JobSpec(jobSpecStr, "http://example.org/agent/defaultAgent", jobName);
 
         entityManager.persist(jobSpec);
@@ -100,26 +140,37 @@ public class JobManagerImpl
             batchConfig.jobRegistry().register(new JobFactory() {
                 @Override
                 public String getJobName() {
-                    return job.getName();
+                    return jobName;
                 }
 
                 @Override
                 public Job createJob() {
-                    return job;
+                    Job result = finalizeJobContext(jobContext);
+//                    StepScope stepScope = jobContext.getBean(StepScope.class);
+//                    System.out.println(stepScope);
+                    return result;
                 }
             });
         }  catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-        System.out.println(subject);
+        //System.out.println(subject);
 
         String result = subject.getURI();
         return result;
     }
 
-    public JsonElement parseJobParams(String jobParamsStr) {
-        JsonElement jobParamsJson = parseJson(jobParamsStr);
+
+    public static JobParameters parseJobP(Gson gson, String jobParamsStr) {
+        JsonElement jobParamsJson = parseJobParams(gson, jobParamsStr);
+        JobParameters result = JobParametersJsonUtils.toJobParameters(jobParamsJson, null);
+
+        return result;
+    }
+
+    public static JsonElement parseJobParams(Gson gson, String jobParamsStr) {
+        JsonElement jobParamsJson = parseJson(gson, jobParamsStr);
         JsonVisitorRewriteJobParameters subVisitor = new JsonVisitorRewriteJobParameters();
         JsonVisitorRewriteKeys visitor = JsonVisitorRewriteKeys.create(JsonTransformerRewrite.create(subVisitor, false));
 
@@ -154,7 +205,7 @@ public class JobManagerImpl
 
         String jobName = jobSpec.getName();
 
-        JsonElement jobParamsJson = parseJobParams(jobParamsStr);
+        JsonElement jobParamsJson = parseJobParams(gson, jobParamsStr);
         String nomalizedJobParamsStr = gson.toJson(jobParamsJson);
         JobParameters jobParams = JobParametersJsonUtils.toJobParameters(jobParamsJson, null);
 
@@ -207,13 +258,13 @@ public class JobManagerImpl
             throw new RuntimeException("No job instance with id " + jobInstanceId + " found");
         }
 
-        String jobId = spec.getJobId();
         String jobParamsStr = spec.getParams();
+        JsonElement jobParamsJson = parseJobParams(gson, jobParamsStr);
+        JobParameters jobParams = JobParametersJsonUtils.toJobParameters(jobParamsJson, null);
 
+        String jobId = spec.getJobId();
         Job job = getJob(jobId);
         String jobName = job.getName();
-        JsonElement jobParamsJson = parseJobParams(jobParamsStr);
-        JobParameters jobParams = JobParametersJsonUtils.toJobParameters(jobParamsJson, null);
 
         //JobExecution jobExecution;
 

@@ -23,7 +23,9 @@ import com.hp.hpl.jena.vocabulary.RDFS;
 import com.hp.hpl.jena.vocabulary.XSD;
 
 public class ConfigJob {
-    @Bean RdfMapperEngine mapperEngine(@Qualifier("jobRepo") SparqlService sparqlService) {
+    @Bean
+    @Autowired
+    public RdfMapperEngine mapperEngine(@Qualifier("jobRepo") SparqlService sparqlService) {
         Prologue prologue = new Prologue();
 
         MainBatchWorkflow.addDefaultPrefixMapping(prologue.getPrefixMapping());
