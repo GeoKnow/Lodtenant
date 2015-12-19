@@ -11,8 +11,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import javax.sql.DataSource;
-
 import org.aksw.commons.util.StreamUtils;
 import org.aksw.gson.utils.JsonWalker;
 import org.aksw.jena_sparql_api.batch.BatchWorkflowManager;
@@ -34,12 +32,13 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.job.SimpleJob;
 import org.springframework.batch.core.launch.JobOperator;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
+import org.springframework.beans.factory.config.Scope;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.JOptCommandLinePropertySource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -52,6 +51,7 @@ import joptsimple.OptionSet;
 import joptsimple.OptionSpec;
 
 public class MainLodtenantCli {
+
 
     private static final Logger logger = LoggerFactory.getLogger(MainLodtenantCli.class);
 
@@ -221,6 +221,8 @@ public class MainLodtenantCli {
         jobContext.register(ConfigSparqlServicesCore.class);
         jobContext.register(ConfigJob.class);
 
+        MainBatchWorkflow.copyScopes(jobContext, configContext);
+        //System.out.println(Arrays.toString(jobContext.getBeanFactory().registerScgetRegisteredScopeNames()));
 
         String paramsStr = null;
         if(options.has(prepareOs)) {

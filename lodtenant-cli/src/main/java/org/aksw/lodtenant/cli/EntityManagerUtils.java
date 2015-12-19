@@ -1,16 +1,15 @@
 package org.aksw.lodtenant.cli;
 
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.ParameterExpression;
 import javax.persistence.criteria.Root;
 
-import org.aksw.jena_sparql_api.mapper.jpa.core.EntityManagerJena;
-import org.aksw.jena_sparql_api.mapper.jpa.criteria.CriteriaBuilderJena;
-
 public class EntityManagerUtils {
 
-    public static <T> T findByAttribute(EntityManagerJena em, Class<T> clazz, String attrName, Object value) {
-        CriteriaBuilderJena cb = em.getCriteriaBuilder();
+    public static <T> T findByAttribute(EntityManager em, Class<T> clazz, String attrName, Object value) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<T> q = cb.createQuery(clazz);
         Root<T> r = q.from(clazz);
         ParameterExpression<String> aliasPlaceholder = cb.parameter(String.class);

@@ -2,6 +2,7 @@ package org.aksw.lodtenant.core.impl;
 
 import java.io.Reader;
 import java.io.StringReader;
+import java.util.Date;
 import java.util.List;
 
 import org.aksw.gson.utils.JsonTransformerRewrite;
@@ -15,13 +16,14 @@ import org.aksw.lodtenant.core.interfaces.JobManager;
 import org.aksw.lodtenant.repo.rdf.JobExecutionSpec;
 import org.aksw.lodtenant.repo.rdf.JobInstanceSpec;
 import org.aksw.lodtenant.repo.rdf.JobSpec;
+import org.springframework.batch.core.BatchStatus;
+import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.configuration.JobFactory;
 import org.springframework.batch.core.configuration.annotation.AbstractBatchConfiguration;
-import org.springframework.batch.core.scope.StepScope;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
@@ -216,7 +218,21 @@ public class JobManagerImpl
                 List<JobInstance> jobInstances = batchConfig.jobExplorer().findJobInstancesByJobName(jobName, 0, 1);
                 jobInstance = jobInstances.get(0);
             } else {
-                jobInstance = batchConfig.jobRepository().createJobInstance(jobName, jobParams);
+                //jobInstance = batchConfig.jobRepository().createJobInstance(jobName, jobParams);
+
+                // HACK With Spring batch 3.0.3 its not possible to create a jobInstance without a jobExecution
+                // so we need to create a superfluous one, and stop it immediately
+                JobExecution jobExecution = batchConfig.jobRepository().createJobExecution(jobName, jobParams);
+                jobExecution.stop();
+                jobExecution.setEndTime(new Date(System.currentTimeMillis()));
+                jobExecution.setStatus(BatchStatus.STOPPED);
+                jobExecution.setExitStatus(ExitStatus.FAILED);
+                batchConfig.jobRepository().updateExecutionContext(jobExecution);
+                batchConfig.jobRepository().update(jobExecution);
+                jobInstance = jobExecution.getJobInstance();
+
+//                JobExecution x = batchConfig.jobRepository().getLastJobExecution(jobName, jobParams);
+//                System.out.println(x);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -289,11 +305,15 @@ public class JobManagerImpl
         JobExecution tmp = batchConfig.jobRepository().getLastJobExecution(jobName, jobParams);
 
         if(tmp == null) {
-            JobInstance jobInstance = new JobInstance(spec.getJobInstanceId(), jobName);
-            tmp = batchConfig.jobRepository().createJobExecution(jobInstance, jobParams, null);
+//            JobInstance jobInstance = new JobInstance(spec.getJobInstanceId(), jobName);
+//            tmp = batchConfig.jobRepository().createJobExecution(jobInstance, jobParams, null);
+//            tmp.stop();
+
         }
 
-        JobExecution jobExecution = batchConfig.jobLauncher().run(job, jobParams);
+        JobExecution jobExecution = batchConfig
+                .jobLauncher()
+                .run(job, jobParams);
 
         //jobExecution = batchConfig.jobRepository().createJobExecution(ji, jobParams, null);
             //jobExecution.stop();
