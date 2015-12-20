@@ -67,7 +67,7 @@ public class JobManagerImpl
         return result;
     }
 
-    public GenericApplicationContext preparejobContext(String jobSpecStr) {
+    public GenericApplicationContext prepareJobContext(String jobSpecStr) {
         JsonElement jobSpecJson = parseJson(gson, jobSpecStr);
         GenericApplicationContext result;
 
@@ -128,7 +128,7 @@ public class JobManagerImpl
 
     @Override
     public String registerJob(String jobSpecStr) {
-        final GenericApplicationContext jobContext = preparejobContext(jobSpecStr);
+        final GenericApplicationContext jobContext = prepareJobContext(jobSpecStr);
 
         final String jobName = getJobName(jobContext);
 
@@ -227,12 +227,13 @@ public class JobManagerImpl
                 jobExecution.setEndTime(new Date(System.currentTimeMillis()));
                 jobExecution.setStatus(BatchStatus.STOPPED);
                 jobExecution.setExitStatus(ExitStatus.FAILED);
-                batchConfig.jobRepository().updateExecutionContext(jobExecution);
                 batchConfig.jobRepository().update(jobExecution);
+                batchConfig.jobRepository().updateExecutionContext(jobExecution);
+                //batchConfig.jobRe
                 jobInstance = jobExecution.getJobInstance();
 
-//                JobExecution x = batchConfig.jobRepository().getLastJobExecution(jobName, jobParams);
-//                System.out.println(x);
+                JobExecution x = batchConfig.jobRepository().getLastJobExecution(jobName, jobParams);
+                System.out.println(x);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);

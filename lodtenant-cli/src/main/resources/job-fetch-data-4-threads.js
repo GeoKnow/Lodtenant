@@ -34,17 +34,22 @@
             { $log: {
                 name: 'logStep',
                 text: '## jobExecutionContext[fetchQueryCount]'
-            } }
+            } },
 
-//            { $sparqlPipe: {
-//                name: 'pipe',
-//                chunk: 1000,
-//                taskExecutor: '#{ taskExecutor }',
-//                throttle: 4,
-//                source: '#{ source }',
-//                target: '#{ target }',
-//                query: '#{ fetchQuery }'
-//            } }
+            { $log: {
+                name: 'logStep2',
+                text: 'yay'
+            } },
+
+            { $sparqlPipe: {
+                name: 'pipe',
+                chunk: 1000,
+                taskExecutor: '#{ taskExecutor }',
+                throttle: 4,
+                source: '#{ source }',
+                target: '#{ target }',
+                query: '#{ fetchQuery }'
+            } }
         ]
     } }
 }
