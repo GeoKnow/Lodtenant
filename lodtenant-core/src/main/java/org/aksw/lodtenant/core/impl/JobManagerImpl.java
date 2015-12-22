@@ -20,13 +20,19 @@ import org.springframework.batch.core.BatchStatus;
 import org.springframework.batch.core.ExitStatus;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobExecutionListener;
 import org.springframework.batch.core.JobInstance;
 import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.configuration.JobFactory;
 import org.springframework.batch.core.configuration.annotation.AbstractBatchConfiguration;
+import org.springframework.batch.core.job.AbstractJob;
+import org.springframework.batch.core.job.SimpleJob;
+import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.util.Assert;
 
 import com.google.gson.Gson;
@@ -67,9 +73,9 @@ public class JobManagerImpl
         return result;
     }
 
-    public GenericApplicationContext prepareJobContext(String jobSpecStr) {
+    public AnnotationConfigApplicationContext prepareJobContext(String jobSpecStr) {
         JsonElement jobSpecJson = parseJson(gson, jobSpecStr);
-        GenericApplicationContext result;
+        AnnotationConfigApplicationContext result;
 
         try {
             result = MainBatchWorkflow.initContext(baseContext, jobSpecJson);
@@ -80,8 +86,22 @@ public class JobManagerImpl
         return result;
     }
 
-    public Job finalizeJobContext(GenericApplicationContext jobContext) {
+    public Job finalizeJobContext(AnnotationConfigApplicationContext jobContext) {
+        //jobContext.register(ApplicationListenerExecutorShutdown.class);
+        jobContext.register(ConfigExecutorShutdown.class);
+        //jobContext.register(ApplicationListener);
+//        ApplicationListenerExecutorShutdown applicationListener = new ApplicationListenerExecutorShutdown();
+//        jobContext.addApplicationListener(applicationListener);
+//        jobContext.register(ConfigExecutorShutdown.class);
         jobContext.refresh();
+
+        ApplicationListenerExecutorShutdown foo = jobContext.getBean(ApplicationListenerExecutorShutdown.class);
+        System.out.println("exec: " + foo);
+
+        ThreadPoolTaskExecutor exec = jobContext.getBean(ThreadPoolTaskExecutor.class);
+        System.out.println("exec: " + exec);
+
+//        jobContext.getAutowireCapableBeanFactory().autowireBean(applicationListener);
         Job result = jobContext.getBean(Job.class);
 
         return result;
@@ -128,7 +148,7 @@ public class JobManagerImpl
 
     @Override
     public String registerJob(String jobSpecStr) {
-        final GenericApplicationContext jobContext = prepareJobContext(jobSpecStr);
+        final AnnotationConfigApplicationContext jobContext = prepareJobContext(jobSpecStr);
 
         final String jobName = getJobName(jobContext);
 
@@ -148,6 +168,23 @@ public class JobManagerImpl
                 @Override
                 public Job createJob() {
                     Job result = finalizeJobContext(jobContext);
+
+                    // We must close our context in order to trigger
+                    // shutdown of resources, such as executors
+                    // Otherwise, the system may hang waiting for dangling threads to terminate
+                    AbstractJob sj = (SimpleJob)result;
+                    sj.registerJobExecutionListener(new JobExecutionListener() {
+                        @Override
+                        public void beforeJob(JobExecution jobExecution) {
+                        }
+
+                        @Override
+                        public void afterJob(JobExecution jobExecution) {
+                            System.out.println("Closing context");
+                            jobContext.close();
+                        }
+                    });
+
 //                    StepScope stepScope = jobContext.getBean(StepScope.class);
 //                    System.out.println(stepScope);
                     return result;
@@ -312,6 +349,8 @@ public class JobManagerImpl
 
         }
 
+//        SimpleJob x;
+//        x.list
         JobExecution jobExecution = batchConfig
                 .jobLauncher()
                 .run(job, jobParams);

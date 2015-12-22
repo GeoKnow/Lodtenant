@@ -22,6 +22,8 @@ import org.aksw.jena_sparql_api.batch.json.rewriters.JsonVisitorRewriteBeans;
 import org.aksw.jena_sparql_api.beans.json.JsonProcessorContext;
 import org.aksw.lodtenant.config.ConfigApp;
 import org.aksw.lodtenant.config.ConfigJob;
+import org.aksw.lodtenant.core.impl.ApplicationListenerExecutorShutdown;
+import org.aksw.lodtenant.core.impl.ConfigExecutorShutdown;
 import org.aksw.lodtenant.core.impl.JobManagerImpl;
 import org.aksw.lodtenant.core.interfaces.JobManager;
 import org.aksw.lodtenant.repo.rdf.JobSpec;
@@ -39,6 +41,7 @@ import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.core.env.JOptCommandLinePropertySource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.core.task.TaskExecutor;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -220,6 +223,8 @@ public class MainLodtenantCli {
         jobContext.setParent(configContext);
         jobContext.register(ConfigSparqlServicesCore.class);
         jobContext.register(ConfigJob.class);
+        //jobContext.register(ConfigExecutorShutdown.class);
+        //jobContext.addApplicationListener(new ApplicationListenerExecutorShutdown());
 
         MainBatchWorkflow.copyScopes(jobContext, configContext);
         //System.out.println(Arrays.toString(jobContext.getBeanFactory().registerScgetRegisteredScopeNames()));
@@ -298,6 +303,7 @@ public class MainLodtenantCli {
             parser.printHelpOn(System.err);
         }
 
+        jobContext.close();
 
         //Thread.sleep(30000);
 //        System.out.println("Waited for 3 sec");
