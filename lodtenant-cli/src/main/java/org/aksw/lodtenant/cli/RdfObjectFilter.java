@@ -3,7 +3,7 @@ package org.aksw.lodtenant.cli;
 import java.util.List;
 
 import com.google.common.base.Predicate;
-import com.hp.hpl.jena.graph.Node;
+import org.apache.jena.graph.Node;
 
 public class RdfObjectFilter
     implements Predicate<Node>

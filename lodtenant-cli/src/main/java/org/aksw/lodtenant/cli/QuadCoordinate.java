@@ -1,6 +1,6 @@
 package org.aksw.lodtenant.cli;
 
-import com.hp.hpl.jena.graph.Node;
+import org.apache.jena.graph.Node;
 
 public class QuadCoordinate {
     protected Node g;

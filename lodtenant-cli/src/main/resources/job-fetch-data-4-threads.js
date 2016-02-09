@@ -3,8 +3,11 @@
        'lgdo': 'http://linkedgeodata.org/ontology/'
     } },
 
-    source: { $sparqlService: ['http://linkedgeodata.org/sparql', 'http://linkedgeodata.org'] },
-    target: { $sparqlService: ['http://localhost:8890/sparql', 'http://linkedgeodata.org'] },
+//    source: { $sparqlService: ['http://linkedgeodata.org/sparql', 'http://linkedgeodata.org'] },
+//    target: { $sparqlService: ['http://localhost:8890/sparql', 'http://linkedgeodata.org'] },
+
+    source: { $sparqlService: ['http://fp7-pp.publicdata.eu/sparql', 'http://fp7-pp.publicdata.eu/'] },
+    target: { $sparqlService: ['http://localhost:8890/sparql', 'http://fp7-pp.publicdata.eu/'] },
 
 //    test: {
 //        type: 'java.lang.String',
@@ -18,34 +21,43 @@
       maxPoolSize: 8
     },
 
-    fetchQuery: 'CONSTRUCT { ?s ?p ?o } { ?s a lgdo:City ; ?p ?o }',
+    test: 'baraoeuuieuouo',
+    //fetchQuery: 'CONSTRUCT { ?s ?p ?o } { ?s a lgdo:City ; ?p ?o }',
+    fetchQuery: 'CONSTRUCT { ?s ?p ?o } { ?s ?p ?o }',
 
     job: { $simpleJob: {
         name: 'fetch-data-4-threads',
 
         steps: [
-            { $sparqlCount: {
-                name: 'countStep',
+//            { $sparqlCount: {
+//                name: 'countStep',
+//                target: '#{ source }',
+//                query: '#{ fetchQuery }',
+//                key: 'fetchQueryCount'
+//            } },
+//
+//            { $logStep: {
+//                name: 'logStep',
+//                text: '#{ jobExecutionContext[fetchQueryCount] }'
+//            } },
+//
+//            { $logStep: {
+//                name: 'logStep2',
+//                text: 'yay'
+//            } },
+
+            { $sparqlUpdate: {
+                name: 'clearTargetGraph',
                 target: '#{ target }',
-                query: '#{ fetchQuery }',
-                key: 'fetchQueryCount'
+                update: 'DELETE WHERE { ?s ?p ?o }'
             } },
 
-            { $log: {
-                name: 'logStep',
-                text: '## jobExecutionContext[fetchQueryCount]'
-            } },
-
-            { $log: {
-                name: 'logStep2',
-                text: 'yay'
-            } },
 
             { $sparqlPipe: {
                 name: 'pipe',
                 chunk: 1000,
                 taskExecutor: '#{ taskExecutor }',
-                throttle: 4,
+                throttle: 8,
                 source: '#{ source }',
                 target: '#{ target }',
                 query: '#{ fetchQuery }'

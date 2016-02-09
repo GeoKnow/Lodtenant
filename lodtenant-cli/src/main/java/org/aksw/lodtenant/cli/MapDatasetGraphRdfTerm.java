@@ -4,7 +4,7 @@ import java.util.AbstractMap;
 import java.util.Map;
 import java.util.Set;
 
-import com.hp.hpl.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DatasetGraph;
 
 public class MapDatasetGraphRdfTerm
     extends AbstractMap<QuadCoordinate, String>
