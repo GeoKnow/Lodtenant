@@ -3,7 +3,8 @@
        'fp7o': 'http://fp7-pp.publicdata.eu/ontology/'
     } },
 
-    source: { $sparqlService: ['http://fp7-pp.publicdata.eu/sparql', 'http://fp7-pp.publicdata.eu/'] },
+    //http://cstadler.aksw.org/data/fp7/sparql
+    source: { $sparqlService: ['http://cstadler.aksw.org/data/fp7/sparql', 'http://fp7-pp.publicdata.eu/'] },
     target: { $sparqlService: ['http://localhost:8890/sparql', 'http://fp7-pp.publicdata.eu/'] },
 
     taskExecutor: {
@@ -15,7 +16,7 @@
     fetchQuery: 'CONSTRUCT { ?s ?p ?o } { ?s ?p ?o }',
 
     job: { $simpleJob: {
-        name: 'fetch-data-4-threads',
+        name: 'fetch-data-4-threads-foobar',
 
         steps: [
             { $sparqlUpdate: {
