@@ -1,16 +1,11 @@
 {
     prefixes: { $prefixes: {
-       'lgdo': 'http://linkedgeodata.org/ontology/'
+       'fp7o': 'http://fp7-pp.publicdata.eu/ontology/'
     } },
 
-    source: { $sparqlService: ['http://linkedgeodata.org/sparql', 'http://linkedgeodata.org'] },
-    target: { $sparqlService: ['http://localhost:8890/sparql', 'http://linkedgeodata.org'] },
-
-//    test: {
-//        type: 'java.lang.String',
-//        scope: 'step',
-//        ctor: ['foo']
-//    },
+    //http://cstadler.aksw.org/data/fp7/sparql
+    source: { $sparqlService: ['http://cstadler.aksw.org/data/fp7/sparql', 'http://fp7-pp.publicdata.eu/'] },
+    target: { $sparqlService: ['http://localhost:8890/sparql', 'http://fp7-pp.publicdata.eu/'] },
 
     taskExecutor: {
       type: 'org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor',
@@ -18,34 +13,24 @@
       maxPoolSize: 8
     },
 
-    fetchQuery: 'CONSTRUCT { ?s ?p ?o } { ?s a lgdo:City ; ?p ?o }',
+    fetchQuery: 'CONSTRUCT { ?s ?p ?o } { ?s ?p ?o }',
 
     job: { $simpleJob: {
-        name: 'fetch-data-4-threads',
+        name: 'fetch-data-4-threads-foobar',
 
         steps: [
-            { $sparqlCount: {
-                name: 'countStep',
+            { $sparqlUpdate: {
+                name: 'clearTargetGraph',
                 target: '#{ target }',
-                query: '#{ fetchQuery }',
-                key: 'fetchQueryCount'
+                update: 'DELETE WHERE { ?s ?p ?o }'
             } },
 
-            { $log: {
-                name: 'logStep',
-                text: '## jobExecutionContext[fetchQueryCount]'
-            } },
-
-            { $log: {
-                name: 'logStep2',
-                text: 'yay'
-            } },
 
             { $sparqlPipe: {
                 name: 'pipe',
                 chunk: 1000,
                 taskExecutor: '#{ taskExecutor }',
-                throttle: 4,
+                throttle: 8,
                 source: '#{ source }',
                 target: '#{ target }',
                 query: '#{ fetchQuery }'

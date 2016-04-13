@@ -203,7 +203,7 @@ public class TalisRdfTerm {
             RDFDatatype dt = typeMapper.getSafeTypeByName(datatype);
             result = NodeFactory.createLiteral(value, lang, dt);
         } else if("bnode".equals(type)) {
-            result = NodeFactory.createBlankNode(value);
+            result = NodeFactory.createBlankNode(value);//.createAnon(new AnonId(value));
         } else {
             throw new RuntimeException("Should not happen");
         }
@@ -305,7 +305,7 @@ public class TalisRdfTerm {
     }
 
     public static DatasetGraph assembleDatasetGraph(Map<QuadCoordinate, String> map, TalisRdfTerm defaults) {
-        DatasetGraph result = DatasetGraphFactory.createMem();
+        DatasetGraph result = DatasetGraphFactory.create();//createMem();
 
         for(QuadCoordinate qc : map.keySet()) {
             Node g = qc.getG();
