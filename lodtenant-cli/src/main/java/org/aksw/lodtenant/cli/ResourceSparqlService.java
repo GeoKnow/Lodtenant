@@ -13,7 +13,7 @@ import org.aksw.jena_sparql_api.core.utils.ServiceUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.WritableResource;
 
-import com.hp.hpl.jena.graph.Node;
+import org.apache.jena.graph.Node;
 
 public class ResourceSparqlService
     implements WritableResource

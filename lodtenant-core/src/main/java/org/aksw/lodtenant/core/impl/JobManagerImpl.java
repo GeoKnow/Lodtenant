@@ -38,7 +38,7 @@ import org.springframework.util.Assert;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonReader;
-import com.hp.hpl.jena.graph.Node;
+import org.apache.jena.graph.Node;
 
 //class JobFactoryLodtenant
 //    implements JobFactory

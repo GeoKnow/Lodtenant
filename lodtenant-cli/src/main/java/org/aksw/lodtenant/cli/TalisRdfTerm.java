@@ -8,18 +8,15 @@ import java.util.List;
 import java.util.Map;
 
 import org.aksw.jena_sparql_api.utils.ListObjectsOfDatasetGraph;
-import org.apache.jena.atlas.lib.MapUtils;
-
-import com.hp.hpl.jena.datatypes.RDFDatatype;
-import com.hp.hpl.jena.datatypes.TypeMapper;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.NodeFactory;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.rdf.model.AnonId;
-import com.hp.hpl.jena.sparql.core.DatasetGraph;
-import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
-import com.hp.hpl.jena.sparql.core.Quad;
-import com.hp.hpl.jena.vocabulary.XSD;
+import org.apache.jena.datatypes.RDFDatatype;
+import org.apache.jena.datatypes.TypeMapper;
+import org.apache.jena.graph.Node;
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.graph.Triple;
+import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
+import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.vocabulary.XSD;
 
 /**
  *
@@ -206,7 +203,7 @@ public class TalisRdfTerm {
             RDFDatatype dt = typeMapper.getSafeTypeByName(datatype);
             result = NodeFactory.createLiteral(value, lang, dt);
         } else if("bnode".equals(type)) {
-            result = NodeFactory.createAnon(new AnonId(value));
+            result = NodeFactory.createBlankNode(value);
         } else {
             throw new RuntimeException("Should not happen");
         }
@@ -271,7 +268,8 @@ public class TalisRdfTerm {
 
             Triple gsp = new Triple(g, s, p);
 
-            MapUtils.increment(gspToCount, gsp);
+            //MapUtils.increment(gspToCount, gsp);
+            gspToCount.merge(gsp, 1, Integer::sum);
             Integer i = gspToCount.get(gsp) - 1;
             for(int c = 0; c < 4; ++c) {
                 String v = TalisRdfTerm.getComponent(o, c);

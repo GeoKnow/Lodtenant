@@ -4,13 +4,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.hp.hpl.jena.graph.Graph;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.graph.Triple;
-import com.hp.hpl.jena.sparql.core.DatasetGraph;
-import com.hp.hpl.jena.sparql.core.DatasetGraphFactory;
-import com.hp.hpl.jena.sparql.core.Quad;
-import com.hp.hpl.jena.sparql.expr.Expr;
+import org.apache.jena.graph.Graph;
+import org.apache.jena.graph.Node;
+import org.apache.jena.sparql.core.DatasetGraph;
+import org.apache.jena.sparql.core.DatasetGraphFactory;
+import org.apache.jena.sparql.core.Quad;
+import org.apache.jena.sparql.expr.Expr;
 
 class TalisRdfTermUtilsOld {
 
@@ -65,7 +64,7 @@ class TalisRdfTermUtilsOld {
         Node s = null;
         Node p = null;
         Node o = null;
-        List<Node> objects = graph.find(s, p, o).mapWith(Triple.getObject).toList();
+        List<Node> objects = graph.find(s, p, o).mapWith(t -> t.getObject()).toList();
 
         return null;
 

@@ -14,8 +14,8 @@ import org.aksw.jena_sparql_api.utils.DatasetDescriptionUtils;
 import org.aksw.lodtenant.repo.rdf.JobSpec;
 
 import com.google.common.base.Supplier;
-import com.hp.hpl.jena.graph.Node;
-import com.hp.hpl.jena.sparql.core.Prologue;
+import org.apache.jena.graph.Node;
+import org.apache.jena.sparql.core.Prologue;
 
 interface ValueHolder<T>
 {

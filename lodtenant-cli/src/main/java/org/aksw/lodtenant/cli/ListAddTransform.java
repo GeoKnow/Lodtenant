@@ -1,7 +1,7 @@
 package org.aksw.lodtenant.cli;
 
 import com.google.common.base.Function;
-import com.hp.hpl.jena.graph.Node;
+import org.apache.jena.graph.Node;
 
 class F_NodeToRdfTerm
     implements Function<Node, TalisRdfTerm>

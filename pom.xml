@@ -55,12 +55,12 @@
         <gson.version>2.3.1</gson.version>
         <guava.version>19.0-rc2</guava.version>
         <jopt.version>4.9</jopt.version>
-        <jena-sparql-api.version>2.13.0-6-SNAPSHOT</jena-sparql-api.version>
+        <jena-sparql-api.version>3.0.1-2-SNAPSHOT</jena-sparql-api.version>
 
         <!-- Project Settings -->
-        <maven.compiler.source>1.7</maven.compiler.source>
-        <maven.compiler.target>1.7</maven.compiler.target>
-        <java.version.javadoc>http://java.sun.com/javase/6/docs/api/</java.version.javadoc>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <java.version.javadoc>http://java.sun.com/javase/8/docs/api/</java.version.javadoc>
         <file.encoding>UTF-8</file.encoding>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
