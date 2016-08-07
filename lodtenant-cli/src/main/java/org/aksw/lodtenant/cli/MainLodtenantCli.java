@@ -14,6 +14,7 @@ import java.util.List;
 import org.aksw.commons.util.StreamUtils;
 import org.aksw.gson.utils.JsonWalker;
 import org.aksw.jena_sparql_api.batch.BatchWorkflowManager;
+import org.aksw.jena_sparql_api.batch.JenaExtensionBatch;
 import org.aksw.jena_sparql_api.batch.SparqlBatchUtils;
 import org.aksw.jena_sparql_api.batch.cli.main.MainBatchWorkflow;
 import org.aksw.jena_sparql_api.batch.config.ConfigBatchJobDynamic;
@@ -247,7 +248,7 @@ public class MainLodtenantCli {
 
 
         jobContext.refresh();
-        MainBatchWorkflow.initJenaExtensions(jobContext);
+        JenaExtensionBatch.initJenaExtensions(jobContext);
 
 
         JobManager jobManager = (JobManager)jobContext.getAutowireCapableBeanFactory().autowire(JobManagerImpl.class, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, true);
@@ -327,7 +328,7 @@ public class MainLodtenantCli {
             ApplicationContext baseContext = MainBatchWorkflow.initBaseContext(jobContext);
 
             // Init jena extensions
-            MainBatchWorkflow.initJenaExtensions(baseContext);
+            JenaExtensionBatch.initJenaExtensions(baseContext);
 
 
 
