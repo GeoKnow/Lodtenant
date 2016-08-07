@@ -56,8 +56,8 @@ import joptsimple.OptionSpec;
 
 public class MainLodtenantCli {
 
-
-    private static final Logger logger = LoggerFactory.getLogger(MainLodtenantCli.class);
+    private static final Logger logger = LoggerFactory
+            .getLogger(MainLodtenantCli.class);
 
     /**
      * Register a workflow
@@ -68,14 +68,12 @@ public class MainLodtenantCli {
      */
     public static final String REGISTER = "register";
 
-
     /**
      * Prepare the execution of a workflow using a set of parameters
      *
      * prepare {alias}
      */
     public static final String PREPARE = "prepare";
-
 
     public static final String CONFIG = "c";
 
@@ -84,95 +82,82 @@ public class MainLodtenantCli {
     public void foobar() throws NoSuchFieldException, SecurityException {
         Class<?> clazz = testDeleteme.getClass();
         Field stringListField = clazz.getDeclaredField("stringList");
-        //stringListField.getDeclaringClass()
-        //stringListField.getg
-        //stringListField.getGe
-        //Type x;
-        ParameterizedType stringListType = (ParameterizedType) stringListField.getGenericType();
-        Class<?> stringListClass = (Class<?>) stringListType.getActualTypeArguments()[0];    }
-
-
+        // stringListField.getDeclaringClass()
+        // stringListField.getg
+        // stringListField.getGe
+        // Type x;
+        ParameterizedType stringListType = (ParameterizedType) stringListField
+                .getGenericType();
+        Class<?> stringListClass = (Class<?>) stringListType
+                .getActualTypeArguments()[0];
+    }
 
     public static void main(String[] args) throws Exception {
         OptionParser parser = new OptionParser();
 
         OptionSpec<File> configFileOs = parser
-                .acceptsAll(Arrays.asList("c", "config"), "Configuration of the context in which workflows run")
+                .acceptsAll(Arrays.asList("c", "config"),
+                        "Configuration of the context in which workflows run")
                 .withRequiredArg()
-                //.describedAs()
-                .ofType(File.class)
-                .required()
-                ;//.defaultsTo(null);
+                // .describedAs()
+                .ofType(File.class).required();// .defaultsTo(null);
 
         OptionSpec<File> jobFileOs = parser
-                .acceptsAll(Arrays.asList("f", "file"), "File containing the job definition")
-                .withRequiredArg()
-                .ofType(File.class)
-                ;
-                //.describedAs();
+                .acceptsAll(Arrays.asList("f", "file"),
+                        "File containing the job definition")
+                .withRequiredArg().ofType(File.class);
+        // .describedAs();
 
         OptionSpec<String> jobIdOs = parser
-                .acceptsAll(Arrays.asList("j", "job"))
-                .withRequiredArg()
-                .ofType(String.class)
-                .describedAs("jobId")
-                ;
+                .acceptsAll(Arrays.asList("j", "job")).withRequiredArg()
+                .ofType(String.class).describedAs("jobId");
 
         OptionSpec<String> instanceIdOs = parser
-                .acceptsAll(Arrays.asList("i", "instance"))
-                .withRequiredArg()
-                .ofType(String.class)
-                .describedAs("instanceId")
-                ;
+                .acceptsAll(Arrays.asList("i", "instance")).withRequiredArg()
+                .ofType(String.class).describedAs("instanceId");
 
         OptionSpec<String> executionIdOs = parser
-                .acceptsAll(Arrays.asList("e", "execution"))
-                .withRequiredArg()
-                .ofType(String.class)
-                .describedAs("executionId")
-                ;
+                .acceptsAll(Arrays.asList("e", "execution")).withRequiredArg()
+                .ofType(String.class).describedAs("executionId");
 
-//        OptionSpec<String> jobParamsOs = parser
-//                .acceptsAll(Arrays.asList("p", "params"), "Job parameter file")
-//                .withRequiredArg()
-//                .ofType(String.class)
-//                ;
-                //.describedAs();
+        // OptionSpec<String> jobParamsOs = parser
+        // .acceptsAll(Arrays.asList("p", "params"), "Job parameter file")
+        // .withRequiredArg()
+        // .ofType(String.class)
+        // ;
+        // .describedAs();
 
         OptionSpec<File> registerOs = parser
-                .acceptsAll(Arrays.asList("r", "register"), "Registers a new job template")
-                .withRequiredArg()
-                .ofType(File.class)
-                ;
-                //.describedAs();
+                .acceptsAll(Arrays.asList("r", "register"),
+                        "Registers a new job template")
+                .withRequiredArg().ofType(File.class);
+        // .describedAs();
 
         OptionSpec<String> prepareOs = parser
                 .acceptsAll(Arrays.asList("prepare"), "Create a job instance")
-                .withOptionalArg()
-                .ofType(String.class)
-                .defaultsTo("")
+                .withOptionalArg().ofType(String.class).defaultsTo("")
                 .describedAs("params file or string")
-//                .describedAs("Create a job instance")
-                ;
+        // .describedAs("Create a job instance")
+        ;
 
         OptionSpec<String> launchOs = parser
                 .acceptsAll(Arrays.asList("launch"), "Create a new execution")
-                .withOptionalArg()
-                .describedAs("jobInstanceId")
+                .withOptionalArg().describedAs("jobInstanceId")
                 .ofType(String.class)
-//                .describedAs("Create a job instance")
-                ;
-
+        // .describedAs("Create a job instance")
+        ;
 
         OptionSet options = parser.parse(args);
 
+        JOptCommandLinePropertySource clps = new JOptCommandLinePropertySource(
+                options);
 
-        JOptCommandLinePropertySource clps = new JOptCommandLinePropertySource(options);
-
-//        QualifierAnnotationAutowireCandidateResolver autowireCandidateResolver = new QualifierAnnotationAutowireCandidateResolver();
+        // QualifierAnnotationAutowireCandidateResolver
+        // autowireCandidateResolver = new
+        // QualifierAnnotationAutowireCandidateResolver();
 
         AnnotationConfigApplicationContext appContext = new AnnotationConfigApplicationContext();
-        //((DefaultListableBeanFactory)appContext.getBeanFactory()).setAutowireCandidateResolver(autowireCandidateResolver);
+        // ((DefaultListableBeanFactory)appContext.getBeanFactory()).setAutowireCandidateResolver(autowireCandidateResolver);
         appContext.getEnvironment().getPropertySources().addFirst(clps);
         appContext.register(ConfigApp.class);
         appContext.refresh();
@@ -181,31 +166,34 @@ public class MainLodtenantCli {
 
         // new OptionSpecBuilder().
 
-//        DefaultListableBeanFactory beanFactory = new DefaultListableBeanFactory();
-//        beanFactory.setAutowireCandidateResolver(candidateResolver);
+        // DefaultListableBeanFactory beanFactory = new
+        // DefaultListableBeanFactory();
+        // beanFactory.setAutowireCandidateResolver(candidateResolver);
         AnnotationConfigApplicationContext configContext = new AnnotationConfigApplicationContext();
-        //((DefaultListableBeanFactory)configContext.getBeanFactory()).setAutowireCandidateResolver(autowireCandidateResolver);
-        //System.out.println("FFS: " + ((DefaultListableBeanFactory)configContext.getBeanFactory()).getAutowireCandidateResolver().getClass());
+        // ((DefaultListableBeanFactory)configContext.getBeanFactory()).setAutowireCandidateResolver(autowireCandidateResolver);
+        // System.out.println("FFS: " +
+        // ((DefaultListableBeanFactory)configContext.getBeanFactory()).getAutowireCandidateResolver().getClass());
         configContext.setParent(appContext);
 
         if (options.has(configFileOs)) {
             File configFile = configFileOs.value(options);
 
             Resource configResource = new FileSystemResource(configFile);
-            JsonReader jsonReader = new JsonReader(new InputStreamReader(configResource.getInputStream()));
+            JsonReader jsonReader = new JsonReader(
+                    new InputStreamReader(configResource.getInputStream()));
             jsonReader.setLenient(true);
 
             JsonElement json = gson.fromJson(jsonReader, JsonElement.class);
             json = MainBatchWorkflow.rewrite(json);
 
-            json = JsonWalker.rewriteUntilNoChange(json, new JsonVisitorRewriteBeans());
-
+            json = JsonWalker.rewriteUntilNoChange(json,
+                    new JsonVisitorRewriteBeans());
 
             String str = gson.toJson(json);
             logger.debug("Workflow specification document: " + str);
 
-
-            JsonProcessorContext contextProcessor = new JsonProcessorContext(configContext);
+            JsonProcessorContext contextProcessor = new JsonProcessorContext(
+                    configContext);
             contextProcessor.process(json);
         }
 
@@ -214,153 +202,137 @@ public class MainLodtenantCli {
 
         SparqlBatchUtils.cleanUp(configContext);
 
-//        System.out.println("CONFIG CONTEXT: " + Arrays.asList(configContext.getBeanDefinitionNames()));
-//        DefaultListableBeanFactory bf = (DefaultListableBeanFactory)configContext.getBeanFactory();
-//        bf.getBean
+        // System.out.println("CONFIG CONTEXT: " +
+        // Arrays.asList(configContext.getBeanDefinitionNames()));
+        // DefaultListableBeanFactory bf =
+        // (DefaultListableBeanFactory)configContext.getBeanFactory();
+        // bf.getBean
 
-        //System.out.println("GOT BEAN: " + BeanFactoryAnnotationUtils.qualifiedBeanOfType(configContext.getBeanFactory(), SparqlService.class, "logging"));
+        // System.out.println("GOT BEAN: " +
+        // BeanFactoryAnnotationUtils.qualifiedBeanOfType(configContext.getBeanFactory(),
+        // SparqlService.class, "logging"));
 
         AnnotationConfigApplicationContext jobContext = new AnnotationConfigApplicationContext();
         jobContext.setParent(configContext);
         jobContext.register(ConfigSparqlServicesCore.class);
         jobContext.register(ConfigJob.class);
-        //jobContext.register(ConfigExecutorShutdown.class);
-        //jobContext.addApplicationListener(new ApplicationListenerExecutorShutdown());
+        // jobContext.register(ConfigExecutorShutdown.class);
+        // jobContext.addApplicationListener(new
+        // ApplicationListenerExecutorShutdown());
 
         MainBatchWorkflow.copyScopes(jobContext, configContext);
-        //System.out.println(Arrays.toString(jobContext.getBeanFactory().registerScgetRegisteredScopeNames()));
+        // System.out.println(Arrays.toString(jobContext.getBeanFactory().registerScgetRegisteredScopeNames()));
 
         String paramsStr = null;
-        if(options.has(prepareOs)) {
+        if (options.has(prepareOs)) {
             String value = prepareOs.value(options);
 
             File paramsFile = new File(value);
             paramsStr = paramsFile.exists()
-                ? Files.toString(paramsFile, Charsets.UTF_8)
-                : value
-                ;
+                    ? Files.toString(paramsFile, Charsets.UTF_8) : value;
 
             JobParameters jobParams = JobManagerImpl.parseJobP(gson, paramsStr);
-            jobContext.getBeanFactory().registerSingleton("jobParameters", jobParams.toProperties());
+            jobContext.getBeanFactory().registerSingleton("jobParameters",
+                    jobParams.toProperties());
         }
-
-
-
 
         jobContext.refresh();
         JenaExtensionBatch.initJenaExtensions(jobContext);
 
+        JobManager jobManager = (JobManager) jobContext
+                .getAutowireCapableBeanFactory().autowire(JobManagerImpl.class,
+                        AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, true);
 
-        JobManager jobManager = (JobManager)jobContext.getAutowireCapableBeanFactory().autowire(JobManagerImpl.class, AutowireCapableBeanFactory.AUTOWIRE_CONSTRUCTOR, true);
-
-
-        String jobId = options.has(jobIdOs)
-                ? jobIdOs.value(options)
-                : null
-                ;
+        String jobId = options.has(jobIdOs) ? jobIdOs.value(options) : null;
 
         String instanceId = options.has(instanceIdOs)
-                ? instanceIdOs.value(options)
-                : null
-                ;
+                ? instanceIdOs.value(options) : null;
 
         String executionId = options.has(executionIdOs)
-                ? executionIdOs.value(options)
-                : null
-                ;
+                ? executionIdOs.value(options) : null;
 
-
-        if(options.has(registerOs)) {
+        if (options.has(registerOs)) {
             File file = registerOs.value(options);
-            String jobSpecStr = Files.toString(file, Charsets.UTF_8);//StreamUtils.toString(new FileInputStream)
+            String jobSpecStr = Files.toString(file, Charsets.UTF_8);// StreamUtils.toString(new
+                                                                     // FileInputStream)
 
-            //JobManager jobManager = jobContext.getBean(JobManager.class);
+            // JobManager jobManager = jobContext.getBean(JobManager.class);
             jobId = jobManager.registerJob(jobSpecStr);
         }
         logger.info("jobId: " + jobId);
 
-
-        if(options.has(prepareOs)) {
+        if (options.has(prepareOs)) {
             instanceId = jobManager.createJobInstance(jobId, paramsStr);
         }
         logger.info("jobInstanceId: " + instanceId);
 
-
         // Whether to print out help on the supported command line options
         boolean isHelpNeeded = true;
 
-
-        if(options.has(launchOs)) {
+        if (options.has(launchOs)) {
             isHelpNeeded = false;
-            //executionId = launchOs.value(options);
-            //String paramsStr = Files.toString(file, Charsets.UTF_8);//StreamUtils.toString(new FileInputStream)
+            // executionId = launchOs.value(options);
+            // String paramsStr = Files.toString(file,
+            // Charsets.UTF_8);//StreamUtils.toString(new FileInputStream)
 
             executionId = jobManager.createJobExecution(instanceId);
         }
         logger.info("jobExecutionId: " + executionId);
 
-
-        if(isHelpNeeded) {
+        if (isHelpNeeded) {
             parser.printHelpOn(System.err);
         }
 
         jobContext.close();
 
-        //Thread.sleep(30000);
-//        System.out.println("Waited for 3 sec");
+        // Thread.sleep(30000);
+        // System.out.println("Waited for 3 sec");
 
-//        Job jobX = jobManager.getJob(jobId);
-//        System.out.println(jobX);
+        // Job jobX = jobManager.getJob(jobId);
+        // System.out.println(jobX);
 
+        // SparqlServiceFactory defaultSparqlServiceFactory =
+        // workflowContext.getBean(SparqlServiceFactory.class);
+        // System.out.println("DefaultSparqlServiceFactory: " +
+        // defaultSparqlServiceFactory);
+        // System.exit(0);
 
-
-//        SparqlServiceFactory defaultSparqlServiceFactory = workflowContext.getBean(SparqlServiceFactory.class);
-//        System.out.println("DefaultSparqlServiceFactory: " + defaultSparqlServiceFactory);
-//        System.exit(0);
-
-        //List<Integer> x; x.getClass().getSimpleName();
-
-
-
+        // List<Integer> x; x.getClass().getSimpleName();
 
         if (false && options.has(registerOs)) {
             // Init parsers and spring batch
-            ApplicationContext baseContext = MainBatchWorkflow.initBaseContext(jobContext);
+            ApplicationContext baseContext = MainBatchWorkflow
+                    .initBaseContext(jobContext);
 
             // Init jena extensions
             JenaExtensionBatch.initJenaExtensions(baseContext);
 
-
-
             File workflowFile = registerOs.value(options);
-
 
             Resource resource = new FileSystemResource(workflowFile);
             String str = StreamUtils.toString(resource.getInputStream());
 
-
-            //Reader reader = new InputStreamReader(resource.getInputStream());
+            // Reader reader = new InputStreamReader(resource.getInputStream());
             Reader reader = new StringReader(str);
             JsonReader jsonReader = new JsonReader(reader);
             jsonReader.setLenient(true);
             JsonElement jobJson = gson.fromJson(jsonReader, JsonElement.class);
 
-
-
             // Finally, init the job
-            ApplicationContext batchContext = MainBatchWorkflow.initContext(baseContext, jobJson);
-
+            ApplicationContext batchContext = MainBatchWorkflow
+                    .initContext(baseContext, jobJson);
 
             JobOperator jobOperator = batchContext.getBean(JobOperator.class);
-            // JobLauncher jobLauncher = batchContext.getBean(JobLauncher.class);
+            // JobLauncher jobLauncher =
+            // batchContext.getBean(JobLauncher.class);
             Job job = batchContext.getBean(Job.class);
-
 
             System.out.println("STEP: " + ((SimpleJob) job).getStepNames());
 
             Collection<String> allBeans = Arrays
                     .asList(batchContext.getBeanDefinitionNames());
-            System.out.println("Got " + allBeans.size() + " beans: " + allBeans);
+            System.out
+                    .println("Got " + allBeans.size() + " beans: " + allBeans);
 
             System.out.println("Job: " + job);
 
