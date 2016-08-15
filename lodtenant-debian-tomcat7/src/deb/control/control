@@ -3,7 +3,7 @@ Version: [[version]]
 Section: web
 Priority: optional
 Architecture: all
-Depends: lodtenant-common, xsltproc, tomcat7
+Depends: lodtenant-common, xsltproc, tomcat7, aksw-deb-util
 Maintainer: Claus Stadler <cstadler@informatik.uni-leipzig.de>
 Description: Lodtenant Common
 Distribution: ldstack-nightly
