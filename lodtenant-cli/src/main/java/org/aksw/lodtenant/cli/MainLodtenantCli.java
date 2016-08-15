@@ -199,7 +199,6 @@ public class MainLodtenantCli {
 
         configContext.register(ConfigBatchJobDynamic.class);
         configContext.refresh();
-
         SparqlBatchUtils.cleanUp(configContext);
 
         // System.out.println("CONFIG CONTEXT: " +

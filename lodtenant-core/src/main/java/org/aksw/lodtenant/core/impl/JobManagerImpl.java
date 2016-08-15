@@ -95,11 +95,11 @@ public class JobManagerImpl
 //        jobContext.register(ConfigExecutorShutdown.class);
         jobContext.refresh();
 
-        ApplicationListenerExecutorShutdown foo = jobContext.getBean(ApplicationListenerExecutorShutdown.class);
-        System.out.println("exec: " + foo);
+        //ApplicationListenerExecutorShutdown foo = jobContext.getBean(ApplicationListenerExecutorShutdown.class);
+        //System.out.println("exec: " + foo);
 
-        ThreadPoolTaskExecutor exec = jobContext.getBean(ThreadPoolTaskExecutor.class);
-        System.out.println("exec: " + exec);
+        //ThreadPoolTaskExecutor exec = jobContext.getBean(ThreadPoolTaskExecutor.class);
+        //System.out.println("exec: " + exec);
 
 //        jobContext.getAutowireCapableBeanFactory().autowireBean(applicationListener);
         Job result = jobContext.getBean(Job.class);
@@ -180,7 +180,7 @@ public class JobManagerImpl
 
                         @Override
                         public void afterJob(JobExecution jobExecution) {
-                            System.out.println("Closing context");
+                            //System.out.println("Closing context");
                             jobContext.close();
                         }
                     });
@@ -270,7 +270,7 @@ public class JobManagerImpl
                 jobInstance = jobExecution.getJobInstance();
 
                 JobExecution x = batchConfig.jobRepository().getLastJobExecution(jobName, jobParams);
-                System.out.println(x);
+                //System.out.println(x);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
